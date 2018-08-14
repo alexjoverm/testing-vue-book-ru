@@ -1,16 +1,16 @@
-# Test Deeply Rendered Vue.js Components in Jest
+# Тестирование компонентов с глубокой вложенностью
 
-Let's see how to use vue-test-utils to test a fully rendered component tree.
+Давайте посмотрим, как использовать vue-test-utils для тестирования полностью отрисованного дерева компонента.
 
-In [the first chapter](#chapter-1) we've seen how to use Shallow Rendering to test a component in isolation, preventing the components sub-tree from rendering.
+В [первой главе](#chapter-1) мы узнали, как использовать поверхностную отрисовку для тестирования компонента изолированно, предотвращая отрисовку поддерева компонента, т.е. его дочерних элементов.
 
-But in some cases, we could want to test components that behave as a group, or [molecules](http://atomicdesign.bradfrost.com/chapter-2/#molecules) as stated in Atomic Design. Keep in mind that this apply to [Presentational Components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0), since they're unaware of app state and logic. In most case, you'd want to use Shallow Rendering for Container components.
+Но в некоторых случаях мы могли бы протестировать компоненты, которые ведут себя как группа, или [молекулы](http://atomicdesign.bradfrost.com/chapter-2/#molecules), как указано в книге Atomic Design. Имейте в виду, что это относится к [презентационным компонентам](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0), поскольку они не знают о состоянии и логике приложения. В большинстве случаев вы хотите использовать поверхностную отрисовку для компонентов-контейнеров.
 
-## Adding a Message Component
+## Добавление компонента Message
 
-For the case of a Message and MessageList components, apart from writing their own unit tests, we could want to test them both as a unit as well.
+В случае компонентов Message и MessageList, помимо написания для них модульных тестов, мы могли бы также протестировать их как единое целое.
 
-Let's start by creating `components/Message.vue`:
+Начнем с создания файла `components/Message.vue`, в котором определим компонент Message:
 
 ```html
 <template>
@@ -24,7 +24,7 @@ Let's start by creating `components/Message.vue`:
 </script>
 ```
 
-And update `components/MessageList.vue` to use it:
+И обновим `components/MessageList.vue` для его использования:
 
 ```html
 <template>
@@ -45,9 +45,9 @@ export default {
 </script>
 ```
 
-## Testing MessageList with Message Component
+## Тестирование MessageList с компонентом Message
 
-To test MessageList with Deep Rendering, we just need to use `mount` instead of `shallow` in the previously created `test/MessageList.test.js`:
+Для тестирования MessageList с полной (глубокой) отрисовкой, нам нужно просто использовать `mount` вместо `shallow` в ранее созданном тесте в файле `test/MessageList.test.js`:
 
 ```javascript
 import { mount } from 'vue-test-utils'
@@ -58,34 +58,34 @@ describe('MessageList.test.js', () => {
 
   beforeEach(() => {
     cmp = mount(MessageList, {
-      // Beaware that props is overriden using `propsData`
+      // Помните, что входные параметры переопределяется с помощью `propsData`
       propsData: {
-        messages: ['Cat']
+        messages: ['Кот']
       }
     })
   })
 
-  it('has received ["Cat"] as the message property', () => {
-    expect(cmp.vm.messages).toEqual(['Cat'])
+  it('получен массив ["Кот"] в качестве входного параметра message', () => {
+    expect(cmp.vm.messages).toEqual(['Кот'])
   })
 
-  it('has the expected html structure', () => {
+  it('получено ожидаемая HTML-структура', () => {
     expect(cmp.element).toMatchSnapshot()
   })
 })
 ```
 
- > Btw, have you realized about the `beforeEach` thing? That's a very clean way to create a clean component before each test, which is very important in unit testing, since it defines that test shouldn't depend on each other.
+> Кстати говоря, вы поняли, что такое `beforeEach`? Это очень элегантный способ создания нового компонента перед каждым выполнением теста, что очень важно при модульном тестировании, поскольку он определяет, что тест не должен зависеть друг от друга.
 
-Both `mount` and `shallow` use exactly the same API, the difference is in the rendering. I'll show you progressively the API along in this series.
+Как `mount`, так и `shallow` используют точно такой же API, разница только в отрисовке. Я покажу вам постепенно API далее в этой серии.
 
-If you run `npm t` you'll see the test are failing because the Snapshot doesn't match for `MessageList.test.js`. To regenerate them, run it with `-u` option:
+Если вы запустите `npm t`, то увидите, что тест завершился неудачей, потому что снимок не соответствует `MessageList.test.js`. Чтобы пересоздать его, запустите выполнение тестов с помощью опции `-u`:
 
 ```
 npm t -- -u
 ```
 
-Then if you open and inspect `test/__snapshots__/MessageList.test.js.snap`, you'll see the `class="message"` is there, meaning the component has been rendered.
+Затем, если вы откроете и посмотрите содержимое `test/__snapshots__/MessageList.test.js.snap`, то увидите присутствие `class="message"`, что означает, что компонент отрисован в соотвествии с последними изменениями.
 
 ```javascript
 // Jest Snapshot v1, https://goo.gl/fbAQLP
@@ -95,13 +95,13 @@ exports[`MessageList.test.js has the expected html structure 1`] = `
   <li
     class="message"
   >
-    Cat
+    Кот
   </li>
 </ul>
 `;
 ```
 
-Keep in mind to **avoid deep rendering when there can be side effects**, since the children component hooks, such `created` and `mount` will be triggered, and there can be HTTP calls or other side effects there that we don't want to be called. If you wanna try what I'm saying, add to the `Message.vue` component a `console.log` in the created hook:
+Помните о том, чтобы **избегать использование глубокой отрисовки в случаях, когда могут быть побочные эффекты**, поскольку хуки компонентов дочерних элементов, такие как `created` и `mount` будут запускаться, и там могут быть HTTP-вызовы или другие операции, которые таким образом будут выполнены, когда как мы при тестировании мы этого не хотим. Если вы хотите попробовать в действии то, о чем я только что написал, добавьте в компонент `Message.vue` вызов `console.log` в хуке `created`:
 
 ```javascript
 export default {
@@ -112,6 +112,6 @@ export default {
 }
 ```
 
-Then if you run the tests again with `npm t`, you'll see the `"CREATED!"` text in the terminal output. So, be cautious.
+Теперь, если вы снова запустите тесты с помощью `npm t`, увидите текст `"CREATED!"` в выводе терминала. Поэтому будьте осторожны.
 
-You can find the [full example on Github](https://github.com/alexjoverm/vue-testing-series/tree/https://github.com/alexjoverm/vue-testing-series/tree/Test-fully-rendered-Vue-js-Components-in-Jest).
+Вы можете найти [полный пример на Github](https://github.com/alexjoverm/vue-testing-series/tree/https://github.com/alexjoverm/vue-testing-series/tree/Test-fully-rendered-Vue-js-Components-in-Jest).
