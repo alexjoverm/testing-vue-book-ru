@@ -1,116 +1,102 @@
-# Test Styles and Structure of Vue.js Components in Jest
+# Тестирование стилей и структуры компонентов Vue.js
 
-[vue-test-utils](https://github.com/vuejs/vue-test-utils) provide us with a set of utilities to assert on Vue.js components.
+[vue-test-utils](https://github.com/vuejs/vue-test-utils) предоставляет набор утилит для утверждения на компонентах Vue.js.
 
-So far, in the tests we've tested via [Jest Snapshots](https://facebook.github.io/jest/docs/snapshot-testing.html). This is great, but sometimes we wanna assert something more specific.
+Пока что в тестах мы использовали [снимки Jest](https://facebook.github.io/jest/docs/snapshot-testing.html). Это здорово, но иногда мы хотим проверить (или утверждать что-либо) что-то более конкретное.
 
-Although you can access the Vue instance via [`cmp.vm`](https://github.com/alexjoverm/vue-testing-series/blob/master/test/MessageList.test.js#L17), you have a set of utilities at your disposal to make it easier. Let's see what we can do.
+Хотя вы можете получить доступ к экземпляру Vue через [`cmp.vm`](https://github.com/alexjoverm/vue-testing-series/blob/master/test/MessageList.test.js#L17), в вашем распоряжении есть набор утилит, чтобы получить его проще. Давайте посмотрим, что мы можем сделать.
 
-## The Wrapper object
+## Объект Wrapper
 
-The `Wrapper` is the main object of `vue-test-utils`. It is the type returned by `mount`, `shallow`, `find` and `findAll` functions. You can [see here](https://github.com/vuejs/vue-test-utils/blob/master/types/index.d.ts#L34) the whole API and typings.
+`Wrapper` — главный объект` vue-test-utils`. Это тип, возвращаемый функциями `mount`,` shallow`, `find` и `findAll`. Вы можете [посмотреть здесь](https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts#L84) весь API и типы.
 
-### `find` and `findAll`
+### Методы `find` и `findAll`
 
-They accept a [Selector](https://github.com/vuejs/vue-test-utils/blob/master/types/index.d.ts#L11) as an argument, which can be both a CSS selector or a Vue Component.
+Они принимают параметр [Selector](https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts#L17) в качестве аргумента, который может быть как CSS-селектором, так и Vue-компонентом.
 
-So we can do things like:
+Поэтому мы можем сделать что-то подобное:
 
 ```javascript
-  let cmp = mount(MessageList)
-  expect(cmp.find('.message').element).toBeInstanceOf(HTMLElement)
+  const messageListCmp = mount(MessageList)
+  
+  expect(messageListCmp.find('.message').element).toBeInstanceOf(HTMLElement)
 
-  // Or even call it multiple times
-  let el = cmp.find('.message').find('span').element
+  // Или даже вызывать его несколько раз
+  let el = messageListCmp.find('.message').find('span').element
 
-  // Although for the previous example, we could do it in one
-  let el = cmp.find('.message span').element
+  // Хотя предыдущий пример мы могли сделать это короче
+  let el = messageListCmp.find('.message span').element
 ```
 
-### Asserting Structure and Style
+### Утверждение структуры и стиля
 
-Let's add more tests to `MessageList.test.js`:
+Давайте добавим больше тестов для `MessageList.test.js`:
 
 ```javascript
-it('is a MessageList component', () => {
-  expect(cmp.is(MessageList)).toBe(true)
+it('это компонент MessageList', () => {
+  expect(messageListCmp.is(MessageList)).toBe(true)
 
-  // Or with CSS selector
-  expect(cmp.is('ul')).toBe(true)
+  // Или с помощью CSS-селектора
+  expect(messageListCmp.is('ul')).toBe(true)
 })
 
-it('contains a Message component', () => {
+it('содержит компонент Message', () => {
   expect(cmp.contains(Message)).toBe(true)
 
-  // Or with CSS selector
+  // Или с помощью CSS-селектора
   expect(cmp.contains('.message')).toBe(true)
 })
 ```
 
-Here we're using `is` to assert the root component type, and `contains` to check for sub-components existence. Just as `find` they receive a Selector, which can be a CSS Selector or a Component.
+Здесь мы используем `is` для утверждения типа корневого компонента и `contains` для проверки существования дочерних компонентов. Так же, как и `find`, они получают объект типа Selector, который может быть CSS-селектором (тип Selector) или компонентом (тип Component).
 
-We have some utils to assert the **Vue instance**:
+У нас есть некоторые утилиты для утверждения **экземпляра Vue**:
 
 ```javascript
-it('Both MessageList and Message are vue instances', () => {
+it('Компоненты MessageList и Message являются экземплярами Vue', () => {
   expect(cmp.isVueInstance()).toBe(true)
   expect(cmp.find(Message).isVueInstance()).toBe(true)
 })
 ```
 
-Now we're going to assert **Structure** in more detail:
+Теперь мы собираемся проверить **структуру** компонента более подробно:
 
 ```javascript
-it('Message element exists', () => {
+it('Существует элемент Message', () => {
   expect(cmp.find('.message').exists()).toBe(true)
 })
 
-it('Message is not empty', () => {
+it('Message не пустой', () => {
   expect(cmp.find(Message).isEmpty()).toBe(false)
 })
 
-it('Message has a class attribute set to "message"', () => {
-  // For asserting "class", the `hasClass` method is easier
-  expect(cmp.find(Message).hasAttribute('class', 'message')).toBe(true)
+it('У Message есть атрибут класса со значением "message"', () => {
+  expect(cmp.attributes().class).toBe('message')
 })
 ```
 
-`exists`, `isEmpty` and `hasAttribute` comes in very handy for this.
+Методы `exists`, `isEmpty` очень удобные на практике.
 
-Then, we have `hasClass` and `hasStyle` to assert **Styling**. Let's update the `Message.vue` component with a style, since `hasStyle` asserts only inline styles:
+Теперь у нас есть `classes()` и `attributes().style` для проверки **стилей**. Давайте обновим компонент `Message.vue` со стилем, поскольку `attributes().style` проверяет только встроенные стили:
 
 ```html
 <li style="margin-top: 10px" class="message">{{message}}</li>
 ```
 
-Here the tests:
+Вот тесты для этого:
 
 ```javascript
-it('Message component has the .message class', () => {
-  expect(cmp.find(Message).hasClass('message')).toBe(true)
+it('У компонента Message задан класс .message', () => {
+  expect(cmp.find(Message).classes()).toContain('message')
 })
 
-it('Message component has style padding-top: 10', () => {
-  expect(cmp.find(Message).hasStyle('padding-top', '10')).toBe(true)
+it('У компонента Message определен стиль `padding-top: 10`', () => {
+  expect(cmp.find(Message).attributes().style).toBe('padding-top: 10px;')
 })
 ```
 
-### `get` methods
+## Резюме
 
-As you've seen, we have some useful utils to assert Vue components. Most use the form of `hasX`, which is great, but to have a `getX` brings better testing experience, in terms of flexibility and debugging. So you could rewrite the following example:
+Для упрощения тестирования компонентов Vue существует куча утилит. Вы можете найти их все в [файле типизации] (https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts).
 
-```javascript
-// `has` form
-expect(cmp.find(Message).hasAttribute('class', 'message')).toBe(true)
-
-// `get` form
-expect(cmp.find(Message).getAttribute('class')).toBe('message')
-```
-
-This is [under discussion](https://github.com/vuejs/vue-test-utils/issues/27) and seems like it will be added to the library at some point.
-
-## Wrapping up
-
-There is a bunch of utils to make easier testing Vue components. You can find them all in [the typings file](https://github.com/vuejs/vue-test-utils/blob/master/types/index.d.ts).
-
-You can find the working code in [this repo](https://github.com/alexjoverm/vue-testing-series/blob/Test-Styles-and-Structure-in-Vue-js-and-Jest/test/MessageList.test.js).
+Вы можете найти рабочий код в [этом репозитории](https://github.com/alexjoverm/vue-testing-series/blob/Test-Styles-and-Structure-in-Vue-js-and-Jest/test/MessageList.test.js).
