@@ -1,34 +1,32 @@
-# Test Computed Properties and Watchers in Vue.js Components with Jest {#chapter-5}
+# Тестирование вычисляемых свойств и наблюдателей в компонентах Vue.js {#chapter-5}
 
-Learn about testing Computed Properties and Watchers reactivity in Vue.js.
+В этой главе вы узнаете о тестировании реактивности вычисляемых свойств и наблюдателей во Vue.js.
 
-Computed properties and watchers are reactive parts of the logic of Vue.js components. They both serve totally different purposes, one is synchronous and the other asynchronous, which makes them behave slightly different.
+Вычисляемые свойства и наблюдатели — реактивные части логики компонентов Vue.js. Они оба предназначены для достижения совершенно других целей, один для синхронной, а другой для асинхронной, что делает их поведение несколько иным.
 
-In this article we'll go through testing them and see what different cases we can find on the way.
+## Вычисляемые свойства
 
-## Computed Properties
-
-Computed properties are simple reactive functions that return data in another form. They behave exactly like the language standard `get/set` properties:
+Вычисляемые свойства — это простые реактивные функции, которые возвращают данные в другой форме. Они ведут себя точно так же, как стандартные свойства `get/set` в языке:
 
 ```javascript
 class X {
-  ...
+  // ...
 
   get fullName() {
     return `${this.name} ${this.surname}`
   }
 
   set fullName() {
-    ...
+    // ...
   }
 }
 ```
 
-In fact, when you're building class based Vue components, as I explain in my [Egghead course "Use TypeScript to Develop Vue.js Web Applications"](https://egghead.io/courses/use-typescript-to-develop-vue-js-web-applications), you'll write it just like that. If you're using plain objects, it'd be:
+Фактически, когда вы создаете компоненты Vue на основе классов, как я объясняю в своем [курсе на Egghead «Использование TypeScript для разработки веб-приложений Vue.js»] (https://egghead.io/courses/use-typescript-to-develop-vue-js-web-applications) (на английском), вы напишете вычисляемые свойства именно так. Если вы используете обычные объекты, это будет так, как показано ниже:
 
 ```javascript
 export default {
-  ...
+  // ...
   computed: {
     fullName() {
       return `${this.name} ${this.surname}`
@@ -37,7 +35,7 @@ export default {
 }
 ```
 
-And you can even add the `set` as follows:
+И вы даже можете добавить `set` следующим образом:
 
 ```javascript
 computed: {
@@ -46,17 +44,17 @@ computed: {
         return `${this.name} ${this.surname}`
       },
       set() {
-        ...
+        // ...
       }
     }
   }
 ```
 
-### Testing Computed Properties
+### Тестирование вычисляемых свойств
 
-Testing a computed property is very simple, and probably sometimes you don't test a computed property exclusively, but test it as part of other tests. But most times it's good to have a test for it, whether that computed property is cleaning up an input, or combining data, we wanna make sure things work as intended. So let's begin.
+Тестирование вычисляемого свойства очень просто и, возможно, иногда вы тестируете не только конкретно вычисляемое свойство, а как её как часть других тестов. Но в большинстве случаев неплохо иметь тесты для подобных свойств, независимо от того, что вычисляемое свойство очищает входное поле ввода или объединяет данные, поэтому мы хотим убедиться, что все работает должным образом. Итак, давайте начнем.
 
-First of all, create a `Form.vue` component:
+Прежде всего, создайте компонент `Form.vue`:
 
 ```html
 <template>
@@ -77,7 +75,7 @@ export default {
   computed: {
     reversedInput() {
       return this.reversed ?
-        this.inputValue.split("").reverse().join("") :
+        this.inputValue.split('').reverse().join('') :
         this.inputValue
     }
   }
@@ -85,78 +83,80 @@ export default {
 </script>
 ```
 
-It will show an input, and next to it the same string but reversed. It's just a silly example, but enough to test it.
+Он будет показывать введённое в поле ввода значение, а рядом с ним ту же строку, но перевернутую наоборот. Это всего лишь простой пример, но это достаточно для проверки вычисляемого свойства.
 
-Now add it to `App.vue`, put it after the `MessageList` component, and remember to import it and include it within the `components` component option. Then, create a `test/Form.test.js` with the usual bare-bones we've used in other tests:
+Теперь сделайте изменения в `App.vue`, импортировав созданный компонент `Form` сразу после `MessageList` и не забудьте включить его в свойство объекта `components`. Затем создайте `test/Form.test.js` со стандартной заглушкой, которую мы уже использовали в других тестах:
 
 ```javascript
-import { shallow } from 'vue-test-utils'
+import { shallowMount } from '@vue/test-utils'
 import Form from '../src/components/Form'
 
 describe('Form.test.js', () => {
   let cmp
 
   beforeEach(() => {
-    cmp = shallow(Form)
+    cmp = shallowMount(Form)
   })
 })
 ```
 
-Now create a test suite with 2 test cases:
+Теперь создайте набор тестов с двумя тестовыми сценариями:
 
 ```javascript
-describe('Properties', () => {
-  it('returns the string in normal order if reversed property is not true', () => {
-    cmp.vm.inputValue = 'Yoo'
-    expect(cmp.vm.reversedInput).toBe('Yoo')
+describe('Свойства', () => {
+  it('возвращает строку в обычном порядке, если свойство reversed не равняется true', () => {
+      cmp.setData({ inputValue: 'Yoo' })
+      expect(cmp.vm.reversedInput).toBe('Yoo')
   })
 
-  it('returns the reversed string if reversed property is true', () => {
-    cmp.vm.inputValue = 'Yoo'
-    cmp.setProps({ reversed: true })
-    expect(cmp.vm.reversedInput).toBe('ooY')
+  it('возвращает перевернутую строку, если свойство reversed равняется true', () => {
+      cmp.setData({ inputValue: 'Yoo' })
+      cmp.setProps({ reversed: true })
+      expect(cmp.vm.reversedInput).toBe('ooY')
   })
 })
 ```
 
-We can access the component instance within `cmp.vm`, so we can access the internal state, computed properties and methods. Then, to test it is just about changing the value and making sure it returns the same string when reversed is false.
+Мы можем получить доступ к экземпляру компонента в `cmp.vm`, т.е. к внутреннему свойству, вычисляемым свойствам и методам. Теперь для тестирования, нам просто нужно изменить значение и убедиться, что возвращается одинаковая строка, если входной параметр `reversed` равен `false`.
 
-For the second case, it would be almost the same, with the difference that we must set the `reversed` property to true. We could navigate through `cmp.vm...` to change it, but vue-test-utils give us a helper method `setProps({ property: value, ... })` that makes it very easy.
+Второй тестовый сценарий во многом похож на первым, лишь за тем исключением, что мы устанавливаем для свойства `reverseed` значение `true`. Мы могли бы использовать `cmp.vm ...` для изменения входного параметра, но `vue-test-utils` предоставляет нам вспомогательный метод `setProps({ property: value, ... })`, что довольно просто для использования.
 
-That's it, depending on the computed property it may need more test cases.
+Вот и все, в зависимости от вычисляемого свойства, может потребоваться больше тестовых сценариев.
 
-## Watchers
+## Наблюдатели
+
+Честно говоря, я не сталкивался ни с одним случаем, когда мне действительно нужно было использовать наблюдателей, где бы вычисляемые свойства не смогли справиться. Я тоже видел как ими злоупотребляют, что приведет к очень нечеткому потоку данных между компонентами и запутыванию всего, поэтому не спешите использовать их и подумайте заранее.
 
 Honestly, I haven't come across any case where I really need to use watchers that I computed properties couldn't solve. I've seen them misused as well, leading to a very unclear data workflow among components and messing everything up, so don't rush on using them and think beforehand.
 
-As you can see in the [Vue.js docs](https://vuejs.org/v2/guide/computed.html#Watchers), watchers are often used to react to data changes and perform asynchronous operations, such can be performing an ajax request.
+Как вы можете видеть в [документации Vue.js](https://ru.vuejs.org/v2/guide/computed.html#%D0%9C%D0%B5%D1%82%D0%BE%D0%B4%D1%8B-%D0%BD%D0%B0%D0%B1%D0%BB%D1%8E%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D0%B8), наблюдатели часто используются для реагирования на изменения данных и выполнения асинхронных операций, например, это может быть выполнение AJAX-запросов.
 
-### Testing Watchers
+### Тестирование наблюдателей
 
-Let's say we wanna do something when the `inputValue` from the state change. We could do an ajax request, but since that's more complicated and we'll see it in the next lesson, let's just do a `console.log`. Add a `watch` property to the `Form.vue` component options:
+Предположим, мы хотим что-то сделать, когда изменится `inputValue` из состояния. Мы могли бы выполнить AJAX-запрос, но поскольку это более сложно, и мы увидим это в следующем уроке, а пока давайте просто напишем `console.log`. Добавьте свойство `watch` в опции компонента `Form.vue`:
 
 ```javascript
 watch: {
   inputValue(newVal, oldVal) {
-    if(newVal.trim().length && newVal !== oldVal) {
+    if (newVal.trim().length && newVal !== oldVal) {
       console.log(newVal)
     }
   }
 }
 ```
 
-Notice the `inputValue` watch function matches the state variable name. By convention, Vue will look it up in both `properties` and `data` state by using the watch function name, in this case `inputValue`, and since it will find it in `data`, it will add the watcher there.
+Обратите внимание, что функция-наблюдатель `inputValue` соответствует имени переменной состояния. По соглашению, Vue будет искать его в состоянии объектов `properties` и `data`, используя имя watch-функции, в этом случае это `inputValue`, который можно найти в `data`, и он добавит наблюдателя туда.
 
-See that a watch function takes the new value as a first parameter, and the old one as the second. In this case we've chosen to log only when it's not empty and the values are different. Usually, we'd like to write a test for each case, depending on the time you have and how critical that code is.
+Посмотрите, функция-наблюдатель принимает новое значение в качестве первого параметра, а старый — вторым. В данном случае мы решили логировать только тогда, когда новое значение не пустое, а её значение отличается от старого значения. Обычно мы хотели бы написать тест для каждого случая, в зависимости от времени, сколько у вас тестов и насколько критичен этот код.
 
-What should we test about the watch function? Well, that's something we'll also discuss further in the next lesson when we talk about testing methods, but let's say we just wanna know that it calls the `console.log` when it should. So, let's add the bare bones of the watchers test suite, within `Form.test.js`:
+Что мы должны протестировать в функции-наблюдателе? Ну, об этом мы еще поговорим далее в следующем уроке, когда затронем методы тестирования, но предположим, что мы просто хотим знать, что она вызывает `console.log`, когда это нужно. Итак, давайте добавим заготовку для набора тестов наблюдателей в `Form.test.js`:
 
 ```javascript
 describe('Form.test.js', () => {
   let cmp
-  ...
+  // ...
 
-  describe('Watchers - inputValue', () => {
+  describe('Наблюдатели - inputValue', () => {
     let spy
 
     beforeAll(() => {
@@ -167,49 +167,49 @@ describe('Form.test.js', () => {
       spy.mockClear()
     })
 
-    it('is not called if value is empty (trimmed)', () => {
+    it('не вызывается, если значение пустое (с удалением пробелов)', () => {
     })
 
-    it('is not called if values are the same', () => {
+    it('не вызывается, если значение одно и то же', () => {
     })
 
-    it('is called with the new value in other cases', () => {
+    it('вызывается с новым значением в других случаях', () => {
     })
   })
 })
 ```
 
-We're using a spy on the `console.log` method, initializing before starting any test, and resetting its state after each of them, so that they start from a clean spy.
+Мы используем шпион дял метода `console.log`, инициализируем его перед началом каждого теста и перезапускаем его состояние после каждого из них, чтобы они начинались с нового шпиона.
 
-To test a watch function, we just need to change the value of what's being watch, in this case the `inputValue` state. But there is something curious... let's start by the last test
+Для тестирования функции-наблюдателя, нам просто нужно изменить значение на другое, которое установлено для наблюдателя, в данном случае это состояние `inputValue`. Но здесь есть кое-что странное... давайте начнем с последнего теста.
 
 ```javascript
-it('is called with the new value in other cases', () => {
-  cmp.vm.inputValue = 'foo'
+it('вызывается с новым значением в других случаях', () => {
+  cmp.setData({ inputValue: 'foo' })
   expect(spy).toBeCalled()
 })
 ```
 
-We change the `inputValue`, so the `console.log` spy should be called, right? Well, if you run it, you'll notice that is not! WTF??? Wait, there is an explanation for this: unlike computed properties, watchers are **deferred to the next update cycle** that Vue uses to look for changes. So, basically, what's happening here is that `console.log` is indeed called, but after the test has finished.
+Мы изменяем значение `inputValue`, поэтому теперь нужно вызвать шпиона `console.log`, правильно? Хорошо, если вы запустите этот тест, то заметите, что нет! Какого чёрта??? Подождите, есть объяснение: в отличие от вычисляемых свойств наблюдатели **откладываются до следующего цикла обновления**, который Vue использует для поиска изменений. Получается здесь происходит то, что `console.log` действительно вызывается, но после завершения теста.
 
-To solve this, we need to use the [`vm.$nextTick`](https://vuejs.org/v2/api/#vm-nextTick) function to defer code to the next update cycle. But if we write:
+Чтобы решить эту проблему, нам нужно использовать функцию [`vm.$nextTick`](https://ru.vuejs.org/v2/api/#vm-nextTick), чтобы отложить код до следующего цикла обновления. Но если мы напишем:
 
 ```javascript
-it('is called with the new value in other cases', () => {
-  cmp.vm.inputValue = 'foo'
+it('вызывается с новым значением в других случаях', () => {
+  cmp.setData({ inputValue: 'foo' })
   cmp.vm.$nextTick(() => {
     expect(spy).toBeCalled()
   })
 })
 ```
 
-It will still fail, since the test finishes with the `expect` function not being called. That happens because now is asynchronous and happens on the `$nextTick` callback. How can we then test it if the expect happens at a later time?
+Тест по-прежнему будет терпеть неудачу, так как он заканчивается, когда функция `expect` ещё не вызывается. Так происходит потому что теперь тест выполняется асинхронно и проверка находится в колбэке `$nextTick`. Как мы можем теперь провести тестирование, если ожидание с проверкой произойдет позднее?
 
-Jest give us a `next` parameter that we can use in the `it` test callbacks, in a way that if it is present, the test will not finish until `next` is called, but if it's not, it will finish synchronously. So, to finally get it right:
+Jest предоставляет нам параметр `next`, который мы можем использовать в колбэках `it`, таким образом, что если он присутствует, тест не завершится до тех пор, пока не будет вызван `next`, но если это не так, тест завершится синхронно , Итак, чтобы, наконец, понять:
 
 ```javascript
-it('is called with the new value in other cases', next => {
-  cmp.vm.inputValue = 'foo'
+it('вызывается с новым значением в других случаях', next => {
+  cmp.setData({ inputValue: 'foo' })
   cmp.vm.$nextTick(() => {
     expect(spy).toBeCalled()
     next()
@@ -217,24 +217,24 @@ it('is called with the new value in other cases', next => {
 })
 ```
 
-We can apply the same strategy for the other two, with the difference that the spy shouldn't be called:
+Мы можем применить ту же стратегию для двух других тестов, с той разницей, что шпион не следует вызывать:
 
 ```javascript
-it('is not called if value is empty (trimmed)', next => {
-  cmp.vm.inputValue = '   '
+it('не вызывается, если значение пустое (с удалением пробелов)', next => {
+  cmp.setData({ inputValue: '   ' })
   cmp.vm.$nextTick(() => {
     expect(spy).not.toBeCalled()
     next()
   })
 })
 
-it('is not called if values are the same', next => {
-  cmp.vm.inputValue = 'foo'
+it('не вызывается, если значение одно и то же', next => {
+  cmp.setData({ inputValue: 'foo' })
 
   cmp.vm.$nextTick(() => {
     spy.mockClear()
-    cmp.vm.inputValue = 'foo'
-
+    cmp.setData({ inputValue: 'foo' })
+    
     cmp.vm.$nextTick(() => {
       expect(spy).not.toBeCalled()
       next()
@@ -243,15 +243,16 @@ it('is not called if values are the same', next => {
 })
 ```
 
-That second one gets a bit more complex than it looked like. The default internal state is empty, so first we need to change it, wait for the next tick, then clear the mock to reset the call count, and change it again. Then after the second tick, we can check the spy and finish the test.
+Этот второй `$nextTick` будет немного сложнее, чем выглядит. Внутреннее состояние по умолчанию пустое, поэтому сначала нам нужно его изменить, дождаться следующего тика, затем очистить mock-объект, чтобы сбросить количество вызовов, и изменим `inputValue` снова. Затем, после второго тика, мы можем проверить шпиона и закончить тест.
 
-This can get simpler if we recreate the component at the beginning, overriding the `data` property. Remember we can override any component option by using the second parameter of the `mount` or `shallow` functions:
+Это может быть проще, если мы пересоздадим компонент в самом начале, переопределив свойство `data`. Помните, что вы можете переопределить любую опцию компонента, используя второй параметр функций `mount` или `shallowMount`:
 
 ```javascript
-it('is not called if values are the same', next => {
-  cmp = shallow(Form, { data: ({ inputValue: 'foo' }) })
-  cmp.vm.inputValue = 'foo'
-
+it('не вызывается, если значение одно и то же', next => {
+  cmp = shallowMount(Form, {
+    data: () => ({ inputValue: 'foo' })
+  })
+  cmp.setData({ inputValue: 'foo' })
   cmp.vm.$nextTick(() => {
     expect(spy).not.toBeCalled()
     next()
@@ -259,8 +260,9 @@ it('is not called if values are the same', next => {
 })
 ```
 
-## Conclusion
+## Резюме
 
-You've learned in this article how to test part of the logic of Vue components: computed properties and watchers. We've gone through different test cases we can come across testing them. Probably you've also learned some of the Vue internals such as the `nextTick` update cycles.
+В этой главе вы узнали, как тестировать часть логики компонентов Vue: вычисляемые свойства и наблюдатели. Мы разобрали различные тестовые сценарии, с которыми вы можете столкнуться, проверяя их. Вероятно, вы также изучили некоторые внутренние функции Vue, такие как циклы обновления `nextTick`.
 
-You can find the code of this article [in this repo](https://github.com/alexjoverm/vue-testing-series/tree/Test-State-Computed-Properties-and-Methods-in-Vue-js-Components-with-Jest).
+Код этой статьи можно найти в [этом репозитории](https://github.com/alexjoverm/vue-testing-series/tree/Test-State-Computed-Properties-and-Methods-in-Vue-js-Components-with-Jest).
+`
