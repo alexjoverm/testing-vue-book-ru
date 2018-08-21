@@ -1,28 +1,28 @@
-# Enhance Jest configuration with Module Aliases
+# Улучшение конфигурации Jest с помощью псевдонимов модулей
 
-Learn how to use Module Aliases Jest configuration to avoid using relative paths.
+В этой главе вы узнаете, как использовать псевдонимы модуля Jest, чтобы избежать использования относительных путей.
 
-The module managers we have in the JavaScript community, mainly ES Modules and CommonJS, don't support project-based paths. They only support relative paths for our own modules, and paths for the `node_modules` folder. When a project grows a bit, it's common to see paths such:
+Менеджеры модулей, которые у нас есть в сообществе JavaScript, главным образом ES-модули и CommonJS, не поддерживают пути на основе проектов. Они поддерживают только относительные пути для наших собственных модулей и пути для каталога `node_modules`. Когда проект немного растет, обычно встречаются такие пути:
 
 ```javascript
 import SomeComponent from '../../../../components/SomeComponent'
 ```
 
-Luckily, we have different ways to cope with this, in a way that we can define aliases for folders relative to the project root, so we could the above line like:
+К счастью, у нас есть разные способы справиться с этим, таким образом мы могли определить псевдонимы для каталог относительно корня проекта, поэтому мы могли бы использовать написать приведенную выше строку так, как показано ниже:
 
 ```javascript
 import SomeComponent from '@/components/SomeComponent'
 ```
 
-The `@` here is an arbitrary character to define the root project, you can define your own. Let's see what solutions we have to apply module aliasing. Let's start [from where we left it on the last article](https://github.com/alexjoverm/vue-testing-series/tree/test-slots).
+Знак `@` здесь является произвольным символом для определения корневого проекта, вы можете определить свой собственный. Давайте посмотрим, какие решения мы можем применить для псевдонимов модулей. Начнем [с того места, где мы оставились в предыдущей главе](https://github.com/alexjoverm/vue-testing-series/tree/test-slots).
 
-## Webpack aliases
+## Псевдонимы Webpack
 
-[Webpack aliases](https://webpack.js.org/configuration/resolve/#resolve-alias) are very simple to set up. You just need to add a `resolve.alias` property in your webpack configuration. If you take a look at the `build/webpack.base.conf.js`, it already has it defined:
+[Псевдонимы Webpack](https://webpack.js.org/configuration/resolve/#resolve-alias) очень просты в настройке. Вам просто нужно добавить свойство `resolve.alias` в конфигурацию вашего webpack. Если вы посмотрите на `build/webpack.base.conf.js`, там уже определен один псевдоним:
 
 ```javascript
 {
-  ...
+  // ...
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
@@ -32,11 +32,11 @@ The `@` here is an arbitrary character to define the root project, you can defin
 }
 ```
 
-Taking this as an entry point, we can add a simple alias that points to the `src` folder and use that as the root:
+Принимая это как точку входа, мы можем добавить простой псевдоним, указывающий на папку `src`, и использовать его в качестве корня проекта:
 
 ```javascript
 {
-  ...
+  // ...
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
@@ -47,17 +47,17 @@ Taking this as an entry point, we can add a simple alias that points to the `src
 }
 ```
 
-Just with this, we can access anything taking the root project as the `@` symbol. Let's go to `src/App.vue` and change the reference to those two components:
+Теперь благодаря этому мы можем получить доступ к чему-либо, взяв корневой проект как символ `@`. Перейдем к `src/App.vue` и изменим импорт на эти два компонента:
 
 ```javascript
-  import MessageList from '@/components/MessageList'
-  import Message from '@/components/Message'
-  ...
+import MessageList from '@/components/MessageList'
+import Message from '@/components/Message'
+// ...
 ```
 
-And if we run `npm start` and open the browser at `localhost:8080`, that should work out of the box.
+И если мы запустим `npm start` и откроем браузер по URL-адресу `localhost: 8080`, это должно работать из коробки.
 
-However, if we try to run the tests by running `npm t`, we'll see Jest doesn't find the modules. We still didn't configured Jest to do so. So let's go to `package.json` where the Jest config is, and add `"@/([^\\.]*)$": "<rootDir>/src/$1"` to `moduleNameMapper`:
+Однако, если мы попытаемся выполнить тесты, запустив `npm t`, мы увидим, что Jest не находит модули. Мы все еще не настроили Jest для работы псевдонимов модулей. Итак, перейдем к `package.json`, где находится конфигурация Jest, и добавим `"@/([^\\.]*)$": "<rootDir>/src/$1"` в `moduleNameMapper`:
 
 ```json
 "jest": {
@@ -68,32 +68,32 @@ However, if we try to run the tests by running `npm t`, we'll see Jest doesn't f
 ...
 ```
 
-Let's explain it:
+Давайте объясним это:
 
- - `@(.*)$`: Whatever starts with `@`, and continues with literally whatever (`(.*)$`) till the end of the string, grouping it by using the parenthesis
- - `<rootDir>/src/$1`: `<rootDir>` is a special word of Jest, meaning the root directory. Then we map it to the `src`, and with `$1` we append the whatever clause from the `(.*)` statement.
+- `@(.*)$`: Что бы ни начиналось с символа `@` и продолжалось в буквальном смысле (`(.*)$`) до конца строки, группируя путь, используя скобки
+- `<rootDir>/src/$1`: `<rootDir>` — специальное слово Jest, которое означает корневой каталог. Затем мы сопоставляем его с `src`, а с помощью `$1` мы добавляем любую составную часть из регулярного выражения `(.*)`.
 
-For example, `@/components/MessageList` will be mapped to `../src/components/MessageList` when you're importing it from the `src` or `test` folders.
+Например, `@/components/MessageList` будет ссылаться на `../src/components/MessageList`, когда вы импортируете его из каталогов `src` или `test`.
 
-That's really it. Now you can even update your `App.test.js` file to use the alias as well, since it's usable from within the tests:
+Это действительно так. Теперь вы можете даже обновить файл `App.test.js`, чтобы использовать псевдоним, поскольку теперь он может использоваться в тестах:
 
 ```javascript
-import { shallow } from "vue-test-utils"
+import { shallowMount } from '@vue/test-utils'
 import App from "@/App"
-...
+// ...
 ```
 
-And it will work for both `.vue` and `.js` files.
+И это будет работать для файлов `.vue` и `.js`.
 
-## Multiple aliases
+## Несколько псевдонимов
 
-Very often, multiple aliases are used for convenience, so instead of using just a `@` to define your root folder, you use many. For example, let's say you have a `actions` and `models` folder. If you create an alias for each one, and then you move the folders around, you just need to change the aliases instead of updating all the references to it in the codebase. That's the power of module aliases, they make your codebase more maintainable and cleaner.
+Очень часто для удобства используются несколько псевдонимов, поэтому вместо использования только `@` для определения корневого каталога вы можете использовать ещё многие другие. Например, предположим, что у вас есть каталог `actions` и `models`. Если вы создаете псевдоним для каждого из них, а затем перемещаете каталоги, то вам просто нужно изменить псевдонимы вместо обновления всех импортов на него по всей кодовой базе. Это мощь псевдонимов модулей, они делают вашу кодовую базу более удобной и чистой.
 
-Let's add a `components` alias in `build/webpack.base.conf.js`:
+Давайте добавим псевдоним `components` в `build/webpack.base.conf.js`:
 
 ```javascript
 {
-  ...
+  // ...
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
@@ -105,7 +105,7 @@ Let's add a `components` alias in `build/webpack.base.conf.js`:
 }
 ```
 
-Then, we just need to add it as well to the Jest configuration in `package.json`:
+Затем нам просто нужно добавить его также в конфигурацию Jest в `package.json`:
 
 ```json
 "jest": {
@@ -117,25 +117,25 @@ Then, we just need to add it as well to the Jest configuration in `package.json`
 ...
 ```
 
-As simple as that. Now, we can try in `App.vue` to use both forms:
+Вот так просто. Теперь мы можем попробовать в `App.vue` использовать обе формы:
 
 ```javascript
 import MessageList from 'components/MessageList'
 import Message from '@/components/Message'
 ```
 
-Stop and re-run the tests, and that should work, as well as if you run `npm start` and try it.
+Остановите и перезапустите выполнение тестов, и это должно работать, а также если вы запустите `npm start` и попробуйте, что из этого выйдет.
 
-## Other solutions
+## Другие решения
 
-I've seen [babel-plugin-webpack-alias](https://github.com/trayio/babel-plugin-webpack-alias), specially used for other testing frameworks such as [mocha](https://mochajs.org/) which doesn't have a module mapper.
+Я видел [babel-plugin-webpack-alias](https://github.com/trayio/babel-plugin-webpack-alias), специально используемый для других фреймворков тестирования, таких как [mocha](https://mochajs.org/), который не имеет модуля-преобразователя (module mapper).
 
-I haven't tried it myself, since Jest already gives you that, but if you have or wanna try, please share how it went!
+Я сам не пробовал, потому что с использованием Jest это не нужно, но если вы хотите попробовать, пожалуйста, поделитесь результатом!
 
-## Conclusion
+## Вывод
 
-Adding module aliases is very simple and can keep your codebase much cleaner and easier to maintain. Jest makes it as well very easy to define them, you just need to keep in in sync with the Webpack aliases, and you can say bye-bye to the dot-hell references.
+Добавление псевдонимов модулей очень просто и может держать вашу кодовую базу намного чище и проще в обслуживании. Jest упрощает их определение, вам просто нужно поддерживать синхронизацию с псевдонимами Webpack, и вы можете прощаться с адом относительных путей.
 
 
-Find the [full example on Github](https://github.com/alexjoverm/vue-testing-series/tree/Enhance-Jest-configuration-with-Module-Aliases)
+Полный пример вы можете найти на [GitHub](https://github.com/alexjoverm/vue-testing-series/tree/Enhance-Jest-configuration-with-Module-Aliases)
 
