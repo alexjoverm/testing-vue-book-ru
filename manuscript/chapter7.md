@@ -1,10 +1,10 @@
-# Test Vue.js Slots in Jest
+# Тестирование слотов Vue.js в Jest
 
-Learn how to test content distributed using slots and named slots.
+В этой главе вы узнаете, как тестировать контент, распространяемый с помощью слотов и именованных слотов.
 
-Slots are the way to make content distribution happen in the web components world. Vue.js slots are made following the [Web Component specs](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/Slots-Proposal.md), meaning that if you learn how to use them in Vue.js, that will be useful in the future ;).
+Слоты — это способ распространения контента в мире веб-компонентов. Слоты Vue.js создаются по [спецификациям веб-компонентов](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/Slots-Proposal.md), что означает, что если вы узнаете, как их использовать во Vue.js, то это знание вам будет полезным для вас в будущем ;).
 
-They make components structure to be much more flexible, moving the responsibility of managing the state to the parent component. For example, we can have a `List` component, and different kind of item components, such `ListItem` and `ListItemImage`. They'll be used like:
+Они создают структуру компонентов более гибкой, перенося ответственность за управление состоянием на родительский компонент. Например, у нас может быть компонент `List` и другого рода компоненты элементов, такие как `ListItem` и `ListItemImage`. Они будут использоваться как показано ниже:
 
 ```html
 <template>
@@ -16,38 +16,38 @@ They make components structure to be much more flexible, moving the responsibili
 </template>
 ```
 
-The inner content of `List` is the slot itself, and its accessible via `<slot>` tag. So the `List` implementation looks like:
+Внутреннее содержимое `List` — это сам слот, доступный через тег `<slot>`. Таким образом, реализация `List` выглядит так:
 
 ```html
 <template>
   <ul>
-    <!-- slot here will equal to what's inside <List> -->
+    <!-- слот будет равен тому, что внутри <List> -->
     <slot></slot>
   </ul>
 </template>
 ```
 
-And, say that the `ListItem` component looks like:
+И, скажем, что элемент `ListItem` выглядит так:
 
 ```html
 <template>
-  <li> {{ someProp }} </li>
+  <li>{{ someProp }}</li>
 </template>
 ```
 
-Then, the final result rendered by Vue.js would be:
+Тогда окончательный результат, отрисованный Vue.js, будет следующим:
 
 ```html
 <ul>
-  <li> someValue </li>
-  <li> someValue </li>
-  <li> someValue </li> <!-- assume the same implementation for ListItemImage -->
+  <li>someValue</li>
+  <li>someValue</li>
+  <li>someValue</li> <!-- предположим, что реализация одна и та же для ListItemImage -->
 </ul>
 ```
 
-## Make MessageList slot based
+## Создание MessageList на основе слотов
 
-Let's take a look at the `MessageList.vue` component:
+Давайте посмотрим на компонент `MessageList.vue`:
 
 ```html
 <template>
@@ -56,14 +56,15 @@ Let's take a look at the `MessageList.vue` component:
           @message-clicked="handleMessageClick"
           :message="message"
           v-for="message in messages"
-          :key="message"/>
+          :key="message"
+        />
     </ul>
 </template>
 ```
 
-MessageList has "hardcoded" the Message component inside. In a way that's more automated, but in the other is not flexible at all. What if you wanna have different types of Message components? What about changing its structure or styling? That's where slots come in handy.
+Компонент `MessageList` имеет «жестко закодированный» компонент `Message` внутри. В некотором смысле это более автоматизировано, но в другом случае такой компонент не является гибким. Что делать, если вы хотите иметь разные типы компонентов `Message`? Как насчет изменения его структуры или стилизации? Вот где слоты пригодятся.
 
-Let's change `Message.vue` to use slots. First, move that `<Message...` part to the `App.vue` component, as well as the `handleMessageClick` method, so it's used externally:
+Давайте будем использовать `Message.vue` для использования слотов. Сначала переместите эту часть `<Message...` в компонент `App.vue`, вместе с методом `handleMessageClick`, потому что он использовался извне:
 
 ```html
 <template>
@@ -84,7 +85,7 @@ import Message from './components/Message'
 
 export default {
   name: 'app',
-  data: () => ({ messages: ['Hey John', 'Howdy Paco'] }),
+  data: () => ({ messages: ['Привет, Джон', 'Как дела, Пако?'] }),
   methods: {
     handleMessageClick(message) {
       console.log(message)
@@ -98,9 +99,9 @@ export default {
 </script>
 ```
 
-Don't forget to import the Message component and add it to the `components` option in `App.vue`.
+Не забудьте импортировать компонент `Message` и добавить его в опцию `components` в `App.vue`.
 
-Then, in `MessageList.vue`, we can remove the references to `Message`, looking like:
+Затем в `MessageList.vue` мы можем удалить ссылки на `Message`, в итоге он будет выглядеть так:
 
 ```html
 <template>
@@ -116,14 +117,14 @@ export default {
 </script>
 ```
 
-## `$children` and `$slots`
+## Свойства экземпляра `$children` и `$slots`
 
-Vue components have two instance variables useful for accessing slots:
+Vue-компоненты имеют две свойства экземпляра, которые полезны для доступа к слотам:
 
- - `$children`: an array of Vue component instances of the default slot.
- - `$slots`: an object of VNodes mapping all the slots defined in the component instance.
+- `$children`: массив экземпляров Vue-компонента в слоте по умолчанию.
+- `$slots`: объект VNodes, содержащий все слоты, определенные в экземпляре компонента.
 
-The `$slots` object has more data available. In fact, `$children` is just a portion of the `$slots` variable, that could be accessed the same way by mapping over the `$slots.default` array, filtered by Vue component instances:
+Объект `$slots` имеет больше доступных данных. Фактически, `$children` — это всего лишь часть переменной `$slots`, к которой можно получить доступ таким же образом путем доступа к `$slots.default`, отфильтрованного экземплярами Vue-компонента:
 
 ```javascript
 const children = this.$slots.default
@@ -131,14 +132,14 @@ const children = this.$slots.default
   .filter(cmp => !!cmp)
 ```
 
-## Testing Slots
+## Тестирование слотов
 
-Probably what we want to test the most out of slots is where they end up in the component, and for that we can reuse the skills got in the article _[Test Styles and Structure of Vue.js Components in Jest](/2017/09/04/Test-Styles-and-Structure-of-Vue-js-Components-in-Jest/)_.
+Вероятно, мы хотим протестировать максимум из слотов, когда они попадают в компонент, и для этого мы можем повторно использовать навыки, полученные из третьей главы.
 
 
-Right now, most of the tests in `MessageList.test.js` will fail, so let's remove them all (or comment them out), and focus on slot testing.
+В настоящее время большинство тестов в `MessageList.test.js` не пройдут, поэтому давайте удалим их все (или закомментируем их) и сосредоточимся на тестировании слотов.
 
-One thing we can test, is to make sure that the Message components end up within a `ul` element with class `list-messages`. In order to pass slots to the `MessageList` component, we can use the `slots` property of the options object of `mount` or `shallow` methods. So let's create a [`beforeEach` method](https://facebook.github.io/jest/docs/en/api.html#beforeeachfn) with the following code:
+Единственное, что мы можем проверить, — убедиться, что компоненты `Message` находятся в элементе `ul` с классом `list-messages`. Для передачи слотов компоненту `MessageList`, мы можем использовать свойство `slots` объекта опций у методов `mount` или `shallowMount`. Итак, давайте создадим метод [`beforeEach`](https://jestjs.io/docs/en/api.html#beforeeachfn-timeout) со следующим кодом:
 
 ```javascript
 beforeEach(() => {
@@ -150,36 +151,36 @@ beforeEach(() => {
 })
 ```
 
-Since we just want to test if the messages are rendered, we can search for `<div class="fake-msg"></div>` as follows:
+Поскольку мы просто хотим проверить, отрисовываются ли сообщения, мы можем искать `<div class="fake-msg"></div>` следующим образом:
 
 ```javascript
-it('Messages are inserted in a ul.list-messages element', () => {
+it('Сообщения добавлены в элемент ul.list-messages', () => {
   const list = cmp.find('ul.list-messages')
   expect(list.findAll('.fake-msg').length).toBe(1)
 })
 ```
 
-And that should be ok to go. The slots option also accepts a component declaration, and even an array, so we could write:
+И это должно пройти успешно. Опция `slots` также принимает объявление компонента и даже массив, поэтому мы могли бы написать:
 
 ```javascript
 import AnyComponent from 'anycomponent'
-...
+// ...
 mount(MessageList, {
   slots: {
-    default: AnyComponent // or [AnyComponent, AnyComponent]
+    default: AnyComponent // Или [AnyComponent, AnyComponent]
   }
 })
 ```
 
-The problem with that is that is very limited, you cannot override props for example, and we need that for the `Message` component since it has a required property. This should affect the cases that you really need to test slots with the expected components. For example, if you wanna make sure that `MessageList` expects only `Message` components as slots. That's [on track and at some point it will land in vue-test-utils](https://github.com/vuejs/vue-test-utils/issues/41#issue-255235880).
+Проблема с этой опцией заключается в том, что она очень ограничена, например, вы не можете переопределять входные параметры, как в данном случае нам нужно это для компонента `Message`, так как он имеет обязательное свойство. Это должно повлиять на случаи, когда вам на самом деле нужны для тестирования слотов с ожидаемыми компонентами. Например, если вы хотите удостовериться, что `MessageList` ожидает только `Message` в качестве слотов. Такой возможности во vue-test-utils нет, вы можете почитать обсуждение в соответствующей [ишью](https://github.com/vuejs/vue-test-utils/issues/41#issue-255235880): можно передать только компонент, но не экземпляр.
 
-As a workaround, we can accomplish that by using a [render function](https://vuejs.org/v2/guide/render-function.html). So we can rewrite the test to be more specific:
+В качестве обходного решения мы можем воспользоваться [render-функцией](https://ru.vuejs.org/v2/guide/render-function.html). Поэтому мы можем переписать тест, чтобы быть более точным:
 
 ```javascript
 beforeEach(() => {
   const messageWrapper = {
     render(h) {
-      return h(Message, { props: { message: 'hey' }  })
+      return h(Message, { props: { message: 'hey' } })
     }
   }
 
@@ -190,22 +191,22 @@ beforeEach(() => {
   })
 })
 
-it('Messages are inserted in a ul.list-messages element', () => {
-  const list = cmp.find('ul.list-messages')
+it('Сообщения добавлены в элементе ul.list-messages', () => {
+  const list = cmp.find(MessageList)
   expect(list.find(Message).isVueInstance()).toBe(true)
 })
 ```
 
-## Testing Named Slots
+## Тестирование именованных слотов
 
-The unnamed slot we used above is called the _default slot_, but we can have multiple slots by using named exports. Let's add a header to the `MessageList.vue` component:
+Неименованный слот, который мы использовали выше, называется _слотом по умолчанию_, но у нас может быть несколько слотов, используя именованный слот. Давайте добавим заголовок к компоненту `MessageList.vue`:
 
 ```html
 <template>
   <div>
     <header class="list-header">
       <slot name="header">
-        This is a default header
+        Это заголовок по умолчанию
       </slot>
     </header>
     <ul class="list-messages">
@@ -215,63 +216,64 @@ The unnamed slot we used above is called the _default slot_, but we can have mul
 </template>
 ```
 
-By using `<slot name="header">` we're defining another slot for the header. You can see a `This is a default header` text inside the slot, that's displayed as the default content when a slot is not passed to the component, and that's applicable to the default slot.
+Используя `<slot name="header">`, мы определяем еще один слот для заголовка. Вы можете увидеть текст `Это заголовок по умолчанию` внутри слота, который отображается как контент по умолчанию, когда слот не передается компоненту, это также относится к слоту по умолчанию.
 
-Then, from `App.vue` we can use add a header to the `MessageList` component by using the `slot="header"` attribute:
+Затем из `App.vue` мы можем использовать добавление заголовка к компоненту` MessageList` с помощью атрибута `slot="header"`:
 
 ```html
 <template>
   <div id="app">
     <MessageList>
       <header slot="header">
-        Awesome header
+        Потрясающий заголовок
       </header>
       <Message
           @message-clicked="handleMessageClick"
           :message="message"
           v-for="message in messages"
-          :key="message"/>
+          :key="message"
+        />
     </MessageList>
   </div>
 </template>
 ```
 
-It's time to write a unit test for it. Testing named slots is just as testing a default slot, the same dynamics apply. So, we can start by testing that the header slot is rendered within the `<header class="list-header">` element, and it renders a default text when no header slot is passed by. In `MessageList.test.js`:
+Пришло время написать для него модульный тест. Тестирование именованных слотов точно такое же, как тестирование слота по умолчанию, тот же самый процесс. Таким образом, мы можем начать с тестирования того, что слот заголовка отображается в элементе `<header class="list-header">`, и он отрисовывает текст по умолчанию, когда ни один из слотов заголовка не передается. В `MessageList.test.js`:
 
 ```javascript
-it('Header slot renders a default header text', () => {
+it('Слот заголовка отрисовывает текст заголовка по умолчанию', () => {
   const header = cmp.find('.list-header')
-  expect(header.text().trim()).toBe('This is a default header')
+  expect(header.text().trim()).toBe('Это заголовок по умолчанию')
 })
 ```
 
-Then, the same but checking the default content gets replaced when we mock the header slot:
+Затем делаем то же самое, но проверка содержимого по умолчанию заменяется, когда мы имитируем слот заголовка:
 
 ```javascript
-it('Header slot is rendered withing .list-header', () => {
+it('Слот заголовка отрисовывается внутри .list-header', () => {
   const component = mount(MessageList, {
     slots: {
-      header: '<div>What an awesome header</div>'
+      header: '<div>Какой удивительный заголовок</div>'
     }
   })
 
   const header = component.find('.list-header')
-  expect(header.text().trim()).toBe('What an awesome header')
+  expect(header.text().trim()).toBe('Какой удивительный заголовок')
 })
 ```
 
-See that the header slot used in this last test is wrapped in a `<div>`. It's important the slots are wrapped in an html tag, otherwise vue-test-utils will complain.
+Посмотрите, что слот заголовка, используемый в этом последнем тесте, завернут в `<div>`. Важно, чтобы слоты были обернуты тегом HTML, иначе `vue-test-utils` будет жаловаться.
 
-## Testing Contextual Slot Specs
+## Тестирование контекстных спецификаций слота
 
-We've test how and where the slots render, and probably that's what we mostly need. However, it doesn't end there. If you pass component instances as slots, just as we're doing in the default slot with Message, you can test functionality related to it.
+Мы тестируем, как и где отрисовываются слоты, и, вероятно, это то, что нам в большинстве случаев нужно. Однако это еще не все. Если вы передаете экземпляры компонентов в качестве слотов, также как в слоте по умолчанию с Message, вы можете протестировать связанные с ним функциональность.
 
-Be careful on what you test here, this is probably something you don't need to do in most cases, since the functional tests of a component should belong to that component test. When talking about testing slots functionality, we test how a slot must behave **in the context of the component where that slot is used**, and that's something is not very common. Normally we just pass the slot and forget about it. So don't get too stick to the following example, It's only purpose is to demonstrate how the tool works.
+Будьте осторожны с тем, что вы тестируете здесь, это, вероятно, то, что вам не нужно делать в большинстве случаев, поскольку функциональные тесты компонента должны принадлежать этому тесту компонента. Говоря о функциональности тестовых слотов, мы тестируем, как слот должен вести себя **в контексте компонента, в котором этот слот используется**, и это что-то не очень распространено. Обычно мы просто передаем слот и забываем об этом. Поэтому не следует придерживаться следующего примера. Единственная цель — продемонстрировать, как работает инструмент.
 
-Let's say that, for whatever reason, in the context of the `MessageList` component, all the `Message` components must have a length higher than 5. We can test that like:
+Предположим, что по какой-либо причине в контексте компонента `MessageList` все компоненты `Message` должны иметь длину больше 5 в одноименном входном параметре. Мы можем проверить это таким образом:
 
 ```javascript
-it('Message length is higher than 5', () => {
+it('Длина сообщения превышает 5 символов', () => {
   const messages = cmp.findAll(Message)
   messages.wrappers.forEach(c => {
     expect(c.vm.message.length).toBeGreaterThan(5)
@@ -279,7 +281,7 @@ it('Message length is higher than 5', () => {
 })
 ```
 
-`findAll` returns an object containing an array of `wrappers` where we can access its `vm` component instance property. This test will fail because the message has a length of 3, so go to the `beforeEach` function and make it longer:
+Метод `findAll` возвращает объект, содержащий массив `wrappers`, где мы можем получить доступ к свойству экземпляра компонента `vm`. Этот тест завершится неудачно, потому что сообщение имеет длину 3, поэтому перейдите к функции `beforeEach` и увеличьте длину сообщение:
 
 ```javascript
 beforeEach(() => {
@@ -288,13 +290,13 @@ beforeEach(() => {
       return h(Message, { props: { message: 'hey yo' }  })
     }
   }
-...
+// ...
 ```
 
-Then it should pass.
+Затем этот тест должен пройти.
 
-## Conclusion
+## Резюме
 
-Testing slots is very simple, normally we'd like to test that they're placed and rendered as we want, so is just like testing style and structure knowing how slots behave or can be mocked. You won't need to test slot functionality very ofter probably. Keep in mind to test things only related to slots when you want to test slots, and think twice if what you're testing belongs to the slot test or the component test itself.
+Тестирование слотов очень просто, обычно мы хотели бы проверить, что они размещены и отрисованы так, как мы хотим, так же, как при тестировании стиля и структуры, зная, как ведут себя слоты или могут быть имитированы. Вероятно, вам не понадобиться часто тестировать функциональность слота. Имейте в виду, проверять только то, что относится непосредственно к слотам при тестировании слотов, и дважды подумайте над тем, что вы тестируете, должно ли это находится в тесте самого компонента или слота.
 
-You can find the code of this article [in this repo](https://github.com/alexjoverm/vue-testing-series/tree/test-slots).
+Код этой главы можно найти в [этом репозитории](https://github.com/alexjoverm/vue-testing-series/tree/test-slots).
