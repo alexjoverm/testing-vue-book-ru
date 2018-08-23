@@ -1,6 +1,6 @@
 # Тестирование стилей и структуры компонентов Vue.js
 
-[vue-test-utils](https://github.com/vuejs/vue-test-utils) предоставляет набор утилит для утверждения на компонентах Vue.js.
+[Vue Test Utils](https://github.com/vuejs/vue-test-utils) предоставляет набор утилит для утверждения на компонентах Vue.js.
 
 Пока что в тестах мы использовали [снимки Jest](https://facebook.github.io/jest/docs/snapshot-testing.html). Это здорово, но иногда мы хотим проверить (или утверждать что-либо) что-то более конкретное.
 
@@ -8,7 +8,7 @@
 
 ## Объект Wrapper
 
-`Wrapper` — главный объект` vue-test-utils`. Это тип, возвращаемый функциями `mount`,` shallow`, `find` и `findAll`. Вы можете [посмотреть здесь](https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts#L84) весь API и типы.
+`Wrapper` — главный объект Vue Test Utils. Это тип, возвращаемый функциями `mount`,` shallow`, `find` и `findAll`. Вы можете [посмотреть здесь](https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts#L84) весь API и типы.
 
 ### Методы `find` и `findAll`
 
