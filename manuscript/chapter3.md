@@ -90,7 +90,7 @@ it('У компонента Message задан класс .message', () => {
   expect(cmp.find(Message).classes()).toContain('message')
 })
 
-it('У компонента Message определен стиль `padding-top: 10`', () => {
+it('У компонента Message определён стиль `padding-top: 10`', () => {
   expect(cmp.find(Message).attributes().style).toBe('padding-top: 10px;')
 })
 ```
