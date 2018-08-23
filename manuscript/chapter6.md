@@ -76,7 +76,7 @@ jest.mock('axios', () => ({
   get: jest.fn()
 }))
 
-import { shallow } from 'vue-test-utils'
+import { shallowMount } from '@vue/test-utils'
 import Form from '../src/components/Form'
 import axios from 'axios' // axios здесь, но их имитация вверху!
 
@@ -163,7 +163,7 @@ it('Axios should not be called here', () => {
 
 ```javascript
 beforeEach(() => {
-  cmp = shallow(Form)
+  cmp = shallowMount(Form)
   jest.resetModules()
   jest.clearAllMocks()
 })
