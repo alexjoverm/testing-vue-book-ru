@@ -144,7 +144,7 @@ module.exports = {
 Имейте в виду, что реестр модулей и состояние подстановочного объекта сохранены, поэтому, если вы впоследствии напишите еще один тест, вы можете получить нежелательные результаты:
 
 ```javascript
-it('Calls axios.get', async () => {
+it('Вызывает axios.get', async () => {
   const result = await cmp.vm.onSubmit('an')
 
   expect(result).toEqual({ data: [3] })
@@ -152,7 +152,7 @@ it('Calls axios.get', async () => {
   expect(axios.get).toBeCalledWith('https://jsonplaceholder.typicode.com/posts?q=an')
 })
 
-it('Axios should not be called here', () => {
+it('Axios не должен быть вызван в данном случае', () => {
   expect(axios.get).toBeCalledWith('https://jsonplaceholder.typicode.com/posts?q=an')
 })
 ```
