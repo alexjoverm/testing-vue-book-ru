@@ -203,14 +203,14 @@ exports[`App.test.js имеет ожидаемую структуру HTML 1`] =
 Vue Test Utils предоставим нам поверхностную отрисовку среди прочего функционала. Мы могли бы переписать предыдущий тест следующим образом:
 
 ```javascript
-import { shallow } from 'vue-test-utils'
+import { shallowMount } from '@vue/test-utils'
 import App from '../src/App'
 
 describe('App.test.js', () => {
   let cmp
 
   beforeEach(() => {
-    cmp = shallow(App, { // Создать поверхностный экземпляр компонента
+    cmp = shallowMount(App, { // Создать поверхностный экземпляр компонента
       data: {
         messages: ['Cat']
       }
@@ -249,14 +249,14 @@ exports[`App.test.js имеет ожидаемую структуру HTML 1`] =
 В том же духе вы можете реализовать тест `MessageList.test.js`, как представлено ниже:
 
 ```javascript
-import { shallow } from 'vue-test-utils'
+import { mount } from '@vue/test-utils'
 import MessageList from '../src/components/MessageList'
 
 describe('MessageList.test.js', () => {
   let cmp
 
   beforeEach(() => {
-    cmp = shallow(MessageList, {
+    cmp = mount(MessageList, {
       // Помните, что входные параметры переопределяются с помощью `propsData`
       propsData: {
         messages: ['Cat']
@@ -264,7 +264,7 @@ describe('MessageList.test.js', () => {
     })
   })
 
-  it('получен массив ["Cat"] как свойство сообщения', () => {
+  it('получен массив ["Cat"] во входном параметре сообщения', () => {
     expect(cmp.vm.messages).toEqual(['Cat'])
   })
 
