@@ -50,7 +50,7 @@ export default {
 Для тестирования MessageList с полной (глубокой) отрисовкой, нам нужно просто использовать `mount` вместо `shallow` в ранее созданном тесте в файле `test/MessageList.test.js`:
 
 ```javascript
-import { mount } from 'vue-test-utils'
+import { mount } from '@vue/test-utils'
 import MessageList from '../src/components/MessageList'
 
 describe('MessageList.test.js', () => {
@@ -69,7 +69,7 @@ describe('MessageList.test.js', () => {
     expect(cmp.vm.messages).toEqual(['Кот'])
   })
 
-  it('получено ожидаемая HTML-структура', () => {
+  it('имеет ожидаемую структуру HTML', () => {
     expect(cmp.element).toMatchSnapshot()
   })
 })
@@ -90,7 +90,7 @@ npm t -- -u
 ```javascript
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MessageList.test.js has the expected html structure 1`] = `
+exports[`MessageList.test.js имеет ожидаемую структуру HTML 1`] = `
 <ul>
   <li
     class="message"
@@ -114,4 +114,4 @@ export default {
 
 Теперь, если вы снова запустите тесты с помощью `npm t`, увидите текст `"CREATED!"` в выводе терминала. Поэтому будьте осторожны.
 
-Вы можете найти [полный пример на Github](https://github.com/alexjoverm/vue-testing-series/tree/https://github.com/alexjoverm/vue-testing-series/tree/Test-fully-rendered-Vue-js-Components-in-Jest).
+Вы можете найти [полный пример на GitHub](https://github.com/alexjoverm/vue-testing-series/tree/https://github.com/alexjoverm/vue-testing-series/tree/Test-fully-rendered-Vue-js-Components-in-Jest).
