@@ -14,7 +14,7 @@
 
 ```html
 <template>
-    <li class="message">{{message}}</li>
+  <li class="message">{{message}}</li>
 </template>
 
 <script>
@@ -28,9 +28,9 @@
 
 ```html
 <template>
-    <ul>
-        <Message :message="message" v-for="message in messages"/>
-    </ul>
+  <ul>
+    <Message :message="message" v-for="message in messages"/>
+  </ul>
 </template>
 
 <script>
@@ -45,7 +45,7 @@ export default {
 </script>
 ```
 
-## Тестирование MessageList с компонентом Message
+## Тестирование `MessageList` с компонентом `Message`
 
 Для тестирования MessageList с полной (глубокой) отрисовкой, нам нужно просто использовать `mount` вместо `shallow` в ранее созданном тесте в файле `test/MessageList.test.js`:
 
@@ -54,7 +54,7 @@ import { mount } from '@vue/test-utils'
 import MessageList from '../src/components/MessageList'
 
 describe('MessageList.test.js', () => {
-  let cmp
+  let cmp;
 
   beforeEach(() => {
     cmp = mount(MessageList, {
@@ -62,16 +62,16 @@ describe('MessageList.test.js', () => {
       propsData: {
         messages: ['Кот']
       }
-    })
-  })
+    });
+  });
 
   it('получен массив ["Кот"] в качестве входного параметра message', () => {
     expect(cmp.vm.messages).toEqual(['Кот'])
-  })
+  });
 
   it('имеет ожидаемую структуру HTML', () => {
     expect(cmp.element).toMatchSnapshot()
-  })
+  });
 })
 ```
 
@@ -101,17 +101,17 @@ exports[`MessageList.test.js имеет ожидаемую структуру HT
 `;
 ```
 
-Помните о том, чтобы **избегать использование глубокой отрисовки в случаях, когда могут быть побочные эффекты**, поскольку хуки компонентов дочерних элементов, такие как `created` и `mount` будут запускаться, и там могут быть HTTP-вызовы или другие операции, которые таким образом будут выполнены, когда как мы при тестировании мы этого не хотим. Если вы хотите попробовать в действии то, о чем я только что написал, добавьте в компонент `Message.vue` вызов `console.log` в хуке `created`:
+Помните о том, чтобы **избегать использование глубокой отрисовки в случаях, когда могут быть побочные эффекты**, поскольку хуки компонентов дочерних элементов, такие как `created` и `mount`, будут запускаться, и там могут быть HTTP-вызовы или другие операции, которые таким образом будут выполнены, когда как мы при тестировании мы этого не хотим. Если вы хотите попробовать в действии то, о чем я только что написал, добавьте в компонент `Message.vue` вызов `console.log` в хуке `created`:
 
 ```javascript
 export default {
   props: ['message'],
   created() {
-    console.log('CREATED!')
+    console.log('СОЗДАН!');
   }
 }
 ```
 
-Теперь, если вы снова запустите тесты с помощью `npm t`, увидите текст `"CREATED!"` в выводе терминала. Поэтому будьте осторожны.
+Теперь, если вы снова запустите тесты с помощью `npm t`, увидите текст `"СОЗДАН!"` в выводе терминала. Поэтому будьте осторожны.
 
 Вы можете найти [полный пример на GitHub](https://github.com/alexjoverm/vue-testing-series/tree/https://github.com/alexjoverm/vue-testing-series/tree/Test-fully-rendered-Vue-js-Components-in-Jest).

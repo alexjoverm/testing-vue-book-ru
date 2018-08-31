@@ -1,27 +1,27 @@
-# Улучшение конфигурации Jest с помощью псевдонимов модулей
+# Улучшение конфигурации Jest с помощью псевдонимов модулей {#chapter-8}
 
 В этой главе вы узнаете, как использовать псевдонимы модуля Jest, чтобы избежать использования относительных путей.
 
 Менеджеры модулей, которые у нас есть в сообществе JavaScript, главным образом ES-модули и CommonJS, не поддерживают пути на основе проектов. Они поддерживают только относительные пути для наших собственных модулей и пути для каталога `node_modules`. Когда проект немного растёт, обычно встречаются такие пути:
 
 ```javascript
-import SomeComponent from '../../../../components/SomeComponent'
+import SomeComponent from '../../../../components/SomeComponent';
 ```
 
 К счастью, у нас есть разные способы справиться с этим, таким образом мы могли определить псевдонимы для каталог относительно корня проекта, поэтому мы могли бы использовать написать приведённую выше строку так, как показано ниже:
 
 ```javascript
-import SomeComponent from '@/components/SomeComponent'
+import SomeComponent from '@/components/SomeComponent';
 ```
 
-Знак `@` здесь является произвольным символом для определения корневого проекта, вы можете определить свой собственный. Давайте посмотрим, какие решения мы можем применить для псевдонимов модулей. Начнём [с того места, где мы оставились в предыдущей главе](https://github.com/alexjoverm/vue-testing-series/tree/test-slots).
+Знак `@` здесь является произвольным символом для определения корневого проекта, вы можете определить свой собственный. Давайте посмотрим, какие решения мы можем применить для псевдонимов модулей. Начнём [с того места, где мы остановились в предыдущей главе](https://github.com/alexjoverm/vue-testing-series/tree/test-slots).
 
 ## Псевдонимы Webpack
 
 [Псевдонимы Webpack](https://webpack.js.org/configuration/resolve/#resolve-alias) очень просты в настройке. Вам просто нужно добавить свойство `resolve.alias` в конфигурацию вашего webpack. Если вы посмотрите на `build/webpack.base.conf.js`, там уже определён один псевдоним:
 
 ```javascript
-{
+module.exports = {
   // ...
   resolve: {
     extensions: ['.js', '.vue', '.json'],
@@ -29,13 +29,13 @@ import SomeComponent from '@/components/SomeComponent'
       'vue$': 'vue/dist/vue.esm.js',
     }
   }
-}
+};
 ```
 
 Принимая это как точку входа, мы можем добавить простой псевдоним, указывающий на папку `src`, и использовать его в качестве корня проекта:
 
 ```javascript
-{
+module.exports = {
   // ...
   resolve: {
     extensions: ['.js', '.vue', '.json'],
@@ -44,14 +44,14 @@ import SomeComponent from '@/components/SomeComponent'
       '@': path.join(__dirname, '..', 'src')
     }
   }
-}
+};
 ```
 
 Теперь благодаря этому мы можем получить доступ к чему-либо, взяв корневой проект как символ `@`. Перейдём к `src/App.vue` и изменим импорт на эти два компонента:
 
 ```javascript
-import MessageList from '@/components/MessageList'
-import Message from '@/components/Message'
+import MessageList from '@/components/MessageList';
+import Message from '@/components/Message';
 // ...
 ```
 
@@ -60,12 +60,14 @@ import Message from '@/components/Message'
 Однако, если мы попытаемся выполнить тесты, запустив `npm t`, мы увидим, что Jest не находит модули. Мы все ещё не настроили Jest для работы псевдонимов модулей. Итак, перейдём к `package.json`, где находится конфигурация Jest, и добавим `"@/([^\\.]*)$": "<rootDir>/src/$1"` в `moduleNameMapper`:
 
 ```json
-"jest": {
+{
+  "jest": {
     "moduleNameMapper": {
       "@(.*)$": "<rootDir>/src/$1",
       "^vue$": "vue/dist/vue.common.js"
-    },
-...
+    }
+  }
+}
 ```
 
 Давайте объясним это:
@@ -87,12 +89,12 @@ import App from "@/App"
 
 ## Несколько псевдонимов
 
-Очень часто для удобства используются несколько псевдонимов, поэтому вместо использования только `@` для определения корневого каталога вы можете использовать ещё многие другие. Например, предположим, что у вас есть каталог `actions` и `models`. Если вы создаёте псевдоним для каждого из них, а затем перемещаете каталоги, то вам просто нужно изменить псевдонимы вместо обновления всех импортов на него по всей кодовой базе. Это мощь псевдонимов модулей, они делают вашу кодовую базу более удобной и чистой.
+Очень часто для удобства используются несколько псевдонимов, поэтому вместо использования только `@` для определения корневого каталога вы можете использовать ещё многие другие. Например, предположим, что у вас есть каталог `actions` и `models`. Если вы создаёте псевдоним для каждого из них, а затем перемещаете каталоги, то вам просто нужно изменить псевдонимы вместо обновления всех выражений импорта на него по всей кодовой базе. Это мощь псевдонимов модулей, они делают вашу кодовую базу более удобной и чистой.
 
 Давайте добавим псевдоним `components` в `build/webpack.base.conf.js`:
 
 ```javascript
-{
+module.exports = {
   // ...
   resolve: {
     extensions: ['.js', '.vue', '.json'],
@@ -102,26 +104,28 @@ import App from "@/App"
       'components': path.join(__dirname, '..', 'src', 'components')
     }
   }
-}
+};
 ```
 
 Затем нам просто нужно добавить его также в конфигурацию Jest в `package.json`:
 
 ```json
-"jest": {
+{
+  "jest": {
     "moduleNameMapper": {
       "@(.*)$": "<rootDir>/src/$1",
       "components(.*)$": "<rootDir>/src/components/$1",
       "^vue$": "vue/dist/vue.common.js"
-    },
-...
+    }
+  }
+}
 ```
 
 Вот так просто. Теперь мы можем попробовать в `App.vue` использовать обе формы:
 
 ```javascript
-import MessageList from 'components/MessageList'
-import Message from '@/components/Message'
+import MessageList from 'components/MessageList';
+import Message from '@/components/Message';
 ```
 
 Остановите и перезапустите выполнение тестов, и это должно работать, а также если вы запустите `npm start` и попробуйте, что из этого выйдет.
@@ -136,6 +140,4 @@ import Message from '@/components/Message'
 
 Добавление псевдонимов модулей очень просто и может держать вашу кодовую базу намного чище и проще в обслуживании. Jest упрощает их определение, вам просто нужно поддерживать синхронизацию с псевдонимами Webpack, и вы можете прощаться с адом относительных путей.
 
-
-Полный пример вы можете найти на [GitHub](https://github.com/alexjoverm/vue-testing-series/tree/Enhance-Jest-configuration-with-Module-Aliases)
-
+Полный пример вы можете найти на [GitHub](https://github.com/alexjoverm/vue-testing-series/tree/Enhance-Jest-configuration-with-Module-Aliases).

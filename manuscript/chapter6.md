@@ -1,4 +1,4 @@
-# Тестирование методов и имитация зависимостей
+# Тестирование методов и имитация зависимостей {#chapter-6}
 
 В этой главе узнаем, как тестировать методы и справляться с имитацией зависимостями модулей.
 
@@ -7,28 +7,27 @@
 Давайте добавим событие `onSubmit` в форме компонента` Form.vue`, который мы создали в [предыдущей главе](#chapter-5):
 
 ```html
-<!-- ... -->
-<form action="" @submit.prevent="onSubmit(inputValue)">
-<!-- ... -->
+<form @submit.prevent="onSubmit(inputValue)">
 ```
 
 Модификатор `.prevent` — это просто удобный способ вызвать `event.preventDefault()`, чтобы не перезагружать страницу. Теперь внесите некоторые изменения, чтобы сделать запрос к API в метод `onSubmit` и сохранить результат с данными в массив `results`:
 
-The `.prevent` modifier is just a convenient way to call `event.preventDefault()` in order to don't reload the page. Now make some modifications to call an api and store the result, by adding a `results` array to the data and a `onSubmit` method:
-
 ```javascript
-data: () => ({
-  inputValue: '',
-  results: []
-}),
-methods: {
-  onSubmit(value) {
-    axios.get('https://jsonplaceholder.typicode.com/posts?q=' + value).then(results => {
-      this.results = results.data
-    })
-  }
-},
-// ...
+export default {
+  data: () => ({
+    inputValue: '',
+    results: []
+  }),
+  methods: {
+    onSubmit(value) {
+      axios
+        .get('https://jsonplaceholder.typicode.com/posts?q=' + value
+        .then(results => {
+          this.results = results.data;
+        });
+    }
+  },
+};
 ```
 
 Метод использует axios для выполнения HTTP-вызова конечной точки «posts» <http://jsonplaceholder.typicode.com>, которая является всего лишь RESTful API для такого рода примеров, с параметром запроса `q` мы можем искать посты, используя предоставленный `value` в виде параметра.
@@ -54,16 +53,16 @@ jest.mock('dependency-path', implementationFunction)
 Вам следует знать, что **`jest.mock` поднят**, что означает, что он будет помещён наверху. Поэтому:
 
 ```javascript
-jest.mock('something', jest.fn)
-import foo from 'bar'
+jest.mock('something', jest.fn);
+import foo from 'bar';
 // ...
 ```
 
 Эквивалентно:
 
 ```javascript
-import foo from 'bar'
-jest.mock('something', jest.fn) // это в конечном итоге превысит импорт и все
+import foo from 'bar';
+jest.mock('something', jest.fn); // это в конечном итоге превысит импорт и все
 // ...
 ```
 
@@ -74,17 +73,19 @@ jest.mock('something', jest.fn) // это в конечном итоге пре�
 ```javascript
 jest.mock('axios', () => ({
   get: jest.fn()
-}))
+}));
 
-import { shallowMount } from '@vue/test-utils'
-import Form from '../src/components/Form'
-import axios from 'axios' // axios здесь, но их имитация вверху!
+import { shallowMount } from '@vue/test-utils';
+import Form from '../src/components/Form';
+import axios from 'axios'; // axios здесь, но их имитация вверху!
 
 // ...
 
 it('Вызывает axios.get', () => {
-  cmp.vm.onSubmit('an')
-  expect(axios.get).toBeCalledWith('https://jsonplaceholder.typicode.com/posts?q=an')
+  cmp.vm.onSubmit('an');
+  expect(axios.get).toBeCalledWith(
+    'https://jsonplaceholder.typicode.com/posts?q=an'
+  );
 })
 ```
 
@@ -101,32 +102,41 @@ jest.mock('axios', () => ({
 Но тем не менее, мы не можем получить доступ к промису, потому что мы его не возвращаем. При тестировании хорошей практикой является возможность вернуть что-то из функции, когда это возможно, что значительно облегчает тестирование. Давайте сделаем это в методе `onSubmit` компонента `Form.vue`:
 
 ```javascript
-onSubmit(value) {
-  const getPromise = axios.get('https://jsonplaceholder.typicode.com/posts?q=' + value)
+export default {
+  methods: {
+    // ...
+    onSubmit(value) {
+      const getPromise = axios.get(
+        'https://jsonplaceholder.typicode.com/posts?q=' + value
+      );
 
-  getPromise.then(results => {
-    this.results = results.data
-  })
+      getPromise.then(results => {
+        this.results = results.data;
+      });
 
-  return getPromise
-}
+      return getPromise;
+    }
+  }
+};
 ```
 
 Затем мы можем использовать предельно понятный синтаксис из ES2017 `async/await` в тесте для проверки результата промиса:
 
 ```javascript
 it('Вызывает axios.get и проверяет результат промиса', async () => {
-  const result = await cmp.vm.onSubmit('an')
+  const result = await cmp.vm.onSubmit('an');
 
-  expect(result).toEqual({ data: [3] })
-  expect(cmp.vm.results).toEqual([3])
-  expect(axios.get).toBeCalledWith('https://jsonplaceholder.typicode.com/posts?q=an')
+  expect(result).toEqual({ data: [3] });
+  expect(cmp.vm.results).toEqual([3]);
+  expect(axios.get).toBeCalledWith(
+    'https://jsonplaceholder.typicode.com/posts?q=an'
+  );
 })
 ```
 
 Вы можете видеть, что мы не только проверяем результат промиса, но также и то, что внутреннее состояние компонента `results` обновляется, как и ожидалось, путём выполнения `expect(cmp.vm.results).toEqual([3])`.
 
-## Держите макеты экстернализированными
+## Выносите mock-объекты во внешние файлы
 
 Jest позволяет нам разделять все наши подстановочные объекты в отдельном JavaScript-файле, помещая их в папку `__mocks__`, чтобы тесты были максимально чистыми и понятными.
 
@@ -136,7 +146,7 @@ Jest позволяет нам разделять все наши подстан
 // test/__mocks__/axios.js
 module.exports = {
   get: jest.fn(() => Promise.resolve({ data: [3] }))
-}
+};
 ```
 
 Точно так же, без каких-либо дополнительных усилий, Jest автоматически применяет подстановочный объект во всех наших тестах, поэтому нам не нужно делать что-либо лишнее или изменять тесты. Обратите внимание, что имя модуля должно совпадать с именем файла. Если вы снова запустите тесты, они все равно должны пройти.
@@ -145,15 +155,19 @@ module.exports = {
 
 ```javascript
 it('Вызывает axios.get', async () => {
-  const result = await cmp.vm.onSubmit('an')
+  const result = await cmp.vm.onSubmit('an');
 
-  expect(result).toEqual({ data: [3] })
-  expect(cmp.vm.results).toEqual([3])
-  expect(axios.get).toBeCalledWith('https://jsonplaceholder.typicode.com/posts?q=an')
+  expect(result).toEqual({ data: [3] });
+  expect(cmp.vm.results).toEqual([3]);
+  expect(axios.get).toBeCalledWith(
+    'https://jsonplaceholder.typicode.com/posts?q=an'
+  );
 })
 
 it('Axios не должен быть вызван в данном случае', () => {
-  expect(axios.get).toBeCalledWith('https://jsonplaceholder.typicode.com/posts?q=an')
+  expect(axios.get).toBeCalledWith(
+    'https://jsonplaceholder.typicode.com/posts?q=an'
+  );
 })
 ```
 
@@ -163,13 +177,13 @@ it('Axios не должен быть вызван в данном случае',
 
 ```javascript
 beforeEach(() => {
-  cmp = shallowMount(Form)
-  jest.resetModules()
-  jest.clearAllMocks()
+  cmp = shallowMount(Form);
+  jest.resetModules();
+  jest.clearAllMocks();
 })
 ```
 
-Теперь каждый тест будет начинаться с чистых подстаночных объектов и модулей, как это и должно быть в модульном тестировании.
+Теперь каждый тест будет начинаться с чистых подстановочных объектов (mocks) и модулей, как это и должно быть в модульном тестировании.
 
 ## Резюме
 

@@ -1,4 +1,4 @@
-# Тестирование слотов Vue.js в Jest
+# Тестирование слотов Vue.js в Jest {#chapter-7}
 
 В этой главе вы узнаете, как тестировать контент, распространяемый с помощью слотов и именованных слотов.
 
@@ -51,14 +51,14 @@
 
 ```html
 <template>
-    <ul>
-        <Message
-          @message-clicked="handleMessageClick"
-          :message="message"
-          v-for="message in messages"
-          :key="message"
-        />
-    </ul>
+  <ul>
+    <Message
+      @message-clicked="handleMessageClick"
+      :message="message"
+      v-for="message in messages"
+      :key="message"
+    />
+  </ul>
 </template>
 ```
 
@@ -71,31 +71,31 @@
   <div id="app">
     <MessageList>
       <Message
-          @message-clicked="handleMessageClick"
-          :message="message"
-          v-for="message in messages"
-          :key="message"/>
+        @message-clicked="handleMessageClick"
+        :message="message"
+        v-for="message in messages"
+        :key="message"/>
     </MessageList>
   </div>
 </template>
 
 <script>
-import MessageList from './components/MessageList'
-import Message from './components/Message'
+import MessageList from './components/MessageList';
+import Message from './components/Message';
 
 export default {
   name: 'app',
   data: () => ({ messages: ['Привет, Джон', 'Как дела, Пако?'] }),
   methods: {
     handleMessageClick(message) {
-      console.log(message)
+      console.log(message);
     }
   },
   components: {
     MessageList,
     Message
   }
-}
+};
 </script>
 ```
 
@@ -105,15 +105,15 @@ export default {
 
 ```html
 <template>
-    <ul class="list-messages">
-        <slot></slot>
-    </ul>
+  <ul class="list-messages">
+    <slot></slot>
+  </ul>
 </template>
 
 <script>
 export default {
   name: 'MessageList'
-}
+};
 </script>
 ```
 
@@ -146,29 +146,29 @@ beforeEach(() => {
     slots: {
       default: '<div class="fake-msg"></div>'
     }
-  })
-})
+  });
+});
 ```
 
 Поскольку мы просто хотим проверить, отрисовываются ли сообщения, мы можем искать `<div class="fake-msg"></div>` следующим образом:
 
 ```javascript
 it('Сообщения добавлены в элемент ul.list-messages', () => {
-  const list = cmp.find('ul.list-messages')
-  expect(list.findAll('.fake-msg').length).toBe(1)
+  const list = cmp.find('ul.list-messages');
+  expect(list.findAll('.fake-msg').length).toBe(1);
 })
 ```
 
 И это должно пройти успешно. Опция `slots` также принимает объявление компонента и даже массив, поэтому мы могли бы написать:
 
 ```javascript
-import AnyComponent from 'anycomponent'
+import AnyComponent from 'anycomponent';
 // ...
 shallowMount(MessageList, {
   slots: {
     default: AnyComponent // Или [AnyComponent, AnyComponent]
   }
-})
+});
 ```
 
 Проблема с этой опцией заключается в том, что она очень ограничена, например, вы не можете переопределять входные параметры, как в данном случае нам нужно это для компонента `Message`, так как он имеет обязательное свойство. Это должно повлиять на случаи, когда вам на самом деле нужны для тестирования слотов с ожидаемыми компонентами. Например, если вы хотите удостовериться, что `MessageList` ожидает только `Message` в качестве слотов. Такой возможности во Vue Test Utils нет, вы можете почитать обсуждение в соответствующей [ишью](https://github.com/vuejs/vue-test-utils/issues/41#issue-255235880): можно передать только компонент, но не экземпляр.
@@ -181,19 +181,19 @@ beforeEach(() => {
     render(h) {
       return h(Message, { props: { message: 'hey' } })
     }
-  }
+  };
 
   cmp = shallowMount(MessageList, {
     slots: {
       default: messageWrapper
     }
-  })
-})
+  });
+});
 
 it('Сообщения добавлены в элементе ul.list-messages', () => {
   const list = cmp.find(MessageList)
   expect(list.find(Message).isVueInstance()).toBe(true)
-})
+});
 ```
 
 ## Тестирование именованных слотов
@@ -209,7 +209,7 @@ it('Сообщения добавлены в элементе ul.list-messages',
       </slot>
     </header>
     <ul class="list-messages">
-        <slot></slot>
+      <slot></slot>
     </ul>
   </div>
 </template>
@@ -227,11 +227,10 @@ it('Сообщения добавлены в элементе ul.list-messages',
         Потрясающий заголовок
       </header>
       <Message
-          @message-clicked="handleMessageClick"
-          :message="message"
-          v-for="message in messages"
-          :key="message"
-        />
+        @message-clicked="handleMessageClick"
+        :message="message"
+        v-for="message in messages"
+        :key="message"/>
     </MessageList>
   </div>
 </template>
@@ -263,7 +262,7 @@ it('Слот заголовка отрисовывается внутри .list-
 
 Посмотрите, что слот заголовка, используемый в этом последнем тесте, завернут в `<div>`. Важно, чтобы слоты были обернуты тегом HTML, иначе Vue Test Utils будет жаловаться.
 
-## Тестирование контекстных спецификаций слота
+## Тестирование спецификаций слота
 
 Мы тестируем, как и где отрисовываются слоты, и, вероятно, это то, что нам в большинстве случаев нужно. Однако это еще не все. Если вы передаете экземпляры компонентов в качестве слотов, по аналогии как в слоте по умолчанию с `Message`, вы можете протестировать связанную с ним функциональность.
 
@@ -286,9 +285,9 @@ it('Длина сообщения превышает 5 символов', () => 
 beforeEach(() => {
   const messageWrapper = {
     render(h) {
-      return h(Message, { props: { message: 'привет' } })
+      return h(Message, { props: { message: 'привет' } });
     }
-  }
+  };
 // ...
 ```
 

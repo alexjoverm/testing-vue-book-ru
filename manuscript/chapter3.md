@@ -1,6 +1,4 @@
-# Тестирование стилей и структуры компонентов Vue.js
-
-[Vue Test Utils](https://github.com/vuejs/vue-test-utils) предоставляет набор утилит для утверждения на компонентах Vue.js.
+# Тестирование стилей и структуры компонентов Vue.js {#chapter-3}
 
 Пока что в тестах мы использовали [снимки Jest](https://facebook.github.io/jest/docs/snapshot-testing.html). Это здорово, но иногда мы хотим проверить (или утверждать что-либо) что-то более конкретное.
 
@@ -17,15 +15,15 @@
 Поэтому мы можем сделать что-то подобное:
 
 ```javascript
-  const messageListCmp = mount(MessageList)
+  const messageListCmp = mount(MessageList);
   
-  expect(messageListCmp.find('.message').element).toBeInstanceOf(HTMLElement)
+  expect(messageListCmp.find('.message').element).toBeInstanceOf(HTMLElement);
 
   // Или даже вызывать его несколько раз
-  let el = messageListCmp.find('.message').find('span').element
+  let el = messageListCmp.find('.message').find('span').element;
 
   // Хотя предыдущий пример мы могли сделать это короче
-  let el = messageListCmp.find('.message span').element
+  let el = messageListCmp.find('.message span').element;
 ```
 
 ### Утверждение структуры и стиля
@@ -34,17 +32,17 @@
 
 ```javascript
 it('это компонент MessageList', () => {
-  expect(messageListCmp.is(MessageList)).toBe(true)
+  expect(messageListCmp.is(MessageList)).toBe(true);
 
   // Или с помощью CSS-селектора
-  expect(messageListCmp.is('ul')).toBe(true)
+  expect(messageListCmp.is('ul')).toBe(true);
 })
 
 it('содержит компонент Message', () => {
-  expect(cmp.contains(Message)).toBe(true)
+  expect(cmp.contains(Message)).toBe(true);
 
   // Или с помощью CSS-селектора
-  expect(cmp.contains('.message')).toBe(true)
+  expect(cmp.contains('.message')).toBe(true);
 })
 ```
 
@@ -54,8 +52,8 @@ it('содержит компонент Message', () => {
 
 ```javascript
 it('Компоненты MessageList и Message являются экземплярами Vue', () => {
-  expect(cmp.isVueInstance()).toBe(true)
-  expect(cmp.find(Message).isVueInstance()).toBe(true)
+  expect(cmp.isVueInstance()).toBe(true);
+  expect(cmp.find(Message).isVueInstance()).toBe(true);
 })
 ```
 
@@ -63,15 +61,15 @@ it('Компоненты MessageList и Message являются экземпл�
 
 ```javascript
 it('Существует элемент Message', () => {
-  expect(cmp.find('.message').exists()).toBe(true)
+  expect(cmp.find('.message').exists()).toBe(true);
 })
 
 it('Message не пустой', () => {
-  expect(cmp.find(Message).isEmpty()).toBe(false)
+  expect(cmp.find(Message).isEmpty()).toBe(false);
 })
 
 it('У Message есть атрибут класса со значением "message"', () => {
-  expect(cmp.attributes().class).toBe('message')
+  expect(cmp.attributes().class).toBe('message');
 })
 ```
 
@@ -87,11 +85,11 @@ it('У Message есть атрибут класса со значением "mes
 
 ```javascript
 it('У компонента Message задан класс .message', () => {
-  expect(cmp.find(Message).classes()).toContain('message')
+  expect(cmp.find(Message).classes()).toContain('message');
 })
 
 it('У компонента Message определён стиль `padding-top: 10`', () => {
-  expect(cmp.find(Message).attributes().style).toBe('padding-top: 10px;')
+  expect(cmp.find(Message).attributes().style).toBe('margin-top: 10px;');
 })
 ```
 
@@ -99,4 +97,4 @@ it('У компонента Message определён стиль `padding-top: 
 
 Для упрощения тестирования компонентов Vue существует куча утилит. Вы можете найти их все в [файле типизации] (https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts).
 
-Вы можете найти рабочий код в [этом репозитории](https://github.com/alexjoverm/vue-testing-series/blob/Test-Styles-and-Structure-in-Vue-js-and-Jest/test/MessageList.test.js).
+Вы можете найти рабочий код этой главы в [этом репозитории](https://github.com/alexjoverm/vue-testing-series/blob/Test-Styles-and-Structure-in-Vue-js-and-Jest/test/MessageList.test.js).

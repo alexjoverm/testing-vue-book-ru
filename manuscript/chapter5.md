@@ -32,13 +32,14 @@ export default {
       return `${this.name} ${this.surname}`
     }
   }
-}
+};
 ```
 
 И вы даже можете добавить `set` следующим образом:
 
 ```javascript
-computed: {
+export default {
+  computed: {
     fullName: {
       get() {
         return `${this.name} ${this.surname}`
@@ -48,6 +49,7 @@ computed: {
       }
     }
   }
+};  
 ```
 
 ### Тестирование вычисляемых свойств
@@ -79,7 +81,7 @@ export default {
         this.inputValue
     }
   }
-}
+};
 </script>
 ```
 
@@ -88,14 +90,14 @@ export default {
 Теперь сделайте изменения в `App.vue`, импортировав созданный компонент `Form` сразу после `MessageList` и не забудьте включить его в свойство объекта `components`. Затем создайте `test/Form.test.js` со стандартной заглушкой, которую мы уже использовали в других тестах:
 
 ```javascript
-import { shallowMount } from '@vue/test-utils'
-import Form from '../src/components/Form'
+import { shallowMount } from '@vue/test-utils';
+import Form from '../src/components/Form';
 
 describe('Form.test.js', () => {
-  let cmp
+  let cmp;
 
   beforeEach(() => {
-    cmp = shallowMount(Form)
+    cmp = shallowMount(Form);
   })
 })
 ```
@@ -105,14 +107,14 @@ describe('Form.test.js', () => {
 ```javascript
 describe('Свойства', () => {
   it('возвращает строку в обычном порядке, если свойство reversed не равняется true', () => {
-      cmp.setData({ inputValue: 'Yoo' })
-      expect(cmp.vm.reversedInput).toBe('Yoo')
+      cmp.setData({ inputValue: 'Yoo' });
+      expect(cmp.vm.reversedInput).toBe('Yoo');
   })
 
   it('возвращает перевёрнутую строку, если свойство reversed равняется true', () => {
-      cmp.setData({ inputValue: 'Yoo' })
-      cmp.setProps({ reversed: true })
-      expect(cmp.vm.reversedInput).toBe('ooY')
+      cmp.setData({ inputValue: 'Yoo' });
+      cmp.setProps({ reversed: true });
+      expect(cmp.vm.reversedInput).toBe('ooY');
   })
 })
 ```
@@ -137,7 +139,7 @@ describe('Свойства', () => {
 watch: {
   inputValue(newVal, oldVal) {
     if (newVal.trim().length && newVal !== oldVal) {
-      console.log(newVal)
+      console.log(newVal);
     }
   }
 }
@@ -151,27 +153,29 @@ watch: {
 
 ```javascript
 describe('Form.test.js', () => {
-  let cmp
-  // ...
+  let cmp;
 
   describe('Наблюдатели - inputValue', () => {
-    let spy
+    let spy;
 
     beforeAll(() => {
-      spy = jest.spyOn(console, 'log')
+      spy = jest.spyOn(console, 'log');
     })
 
     afterEach(() => {
-      spy.mockClear()
+      spy.mockClear();
     })
 
     it('не вызывается, если значение пустое (с удалением пробелов)', () => {
+      // TODO
     })
 
     it('не вызывается, если значение одно и то же', () => {
+      // TODO
     })
 
     it('вызывается с новым значением в других случаях', () => {
+      // TODO
     })
   })
 })
@@ -183,8 +187,8 @@ describe('Form.test.js', () => {
 
 ```javascript
 it('вызывается с новым значением в других случаях', () => {
-  cmp.vm.inputValue = 'foo'
-  expect(spy).toBeCalled()
+  cmp.vm.inputValue = 'foo';
+  expect(spy).toBeCalled();
 })
 ```
 
@@ -196,8 +200,8 @@ it('вызывается с новым значением в других слу
 it('вызывается с новым значением в других случаях', done => {
   cmp.vm.inputValue = 'foo'
   cmp.vm.$nextTick(() => {
-    expect(spy).toBeCalled()
-    done()
+    expect(spy).toBeCalled();
+    done();
   })
 })
 ```
@@ -208,8 +212,8 @@ _В таком случае необходим вызов функции `done`,
 
 ```javascript
 it('вызывается с новым значением в других случаях', () => {
-  cmp.setData({ inputValue: 'foo' })
-  expect(spy).toBeCalled()
+  cmp.setData({ inputValue: 'foo' });
+  expect(spy).toBeCalled();
 })
 ```
 
@@ -217,8 +221,8 @@ it('вызывается с новым значением в других слу
 
 ```javascript
 it('не вызывается, если значение пустое (с удалением пробелов)', next => {
-  cmp.setData({ inputValue: '   ' })
-  expect(spy).not.toBeCalled()
+  cmp.setData({ inputValue: '   ' });
+  expect(spy).not.toBeCalled();
 })
 ```
 
@@ -230,9 +234,9 @@ it('не вызывается, если значение пустое (с уда
 it('не вызывается, если значение одно и то же', () => {
   cmp = shallowMount(Form, {
     data: () => ({ inputValue: 'foo' })
-  })
-  cmp.setData({ inputValue: 'foo' })  
-  expect(spy).not.toBeCalled()
+  });
+  cmp.setData({ inputValue: 'foo' });
+  expect(spy).not.toBeCalled();
 })
 ```
 

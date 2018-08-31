@@ -39,6 +39,9 @@ npm i -D jest jest-vue-preprocessor babel-jest
 
 **Обновление (10.10.2017)**: он может быть установлен уже из npm, так как версия `beta.1` была опубликована.
 
+I> ## На заметку
+I> [Vue Test Utils](https://github.com/vuejs/vue-test-utils) предоставляет набор утилит для утверждений (проведения проверок) на компонентах Vue.js.
+
 ```bash
 npm i -D vue-test-utils
 ```
@@ -85,11 +88,11 @@ npm i -D vue-test-utils
 
 ```html
 <template>
-    <ul>
-        <li v-for="message in messages">
-            {{ message }}
-        </li>
-    </ul>
+  <ul>
+    <li v-for="message in messages">
+      {{ message }}
+    </li>
+  </ul>
 </template>
 
 <script>
@@ -129,7 +132,7 @@ import Vue from 'vue'
 import App from '../src/App'
 
 describe('App.test.js', () => {
-  let cmp, vm
+  let cmp, vm;
 
   beforeEach(() => {
     cmp = Vue.extend(App) // Создать копию исходного компонента
@@ -137,19 +140,17 @@ describe('App.test.js', () => {
       data: { // Заменить значение данных на эти поддельные данные
         messages: ['Cat']
       }
-    }).$mount() // Создать экземпляр и примонтировать компонент
+    }).$mount(); // Создать экземпляр и примонтировать компонент
   })
 
   it('сообщения идентичны ["Cat"]', () => {
     expect(vm.messages).toEqual(['Cat'])
-  })
+  });
 })
 ```
 
-I> ## Примечание
+I> ## На заметку
 I> Обычно сообщения в функции `it` пишутся на английском языке, но сейчас и далее они будут переведены на русский язык.
-
-Right now, if we run `npm test` (or `npm t` as a shorthand version), the test should run and pass. Since we're modifying the tests, let's better run it in **watch mode**:
 
 В данный момент, если мы выполним `npm test` (или `npm t` как сокращённая версия этой команды), тест должен запуститься и успешно пройти. Поскольку мы изменяем тесты, давайте лучше запустим их **в режиме просмотра (watch mode)**:
 
@@ -164,7 +165,7 @@ npm t -- --watch
 ```javascript
 it('имеет ожидаемую структуру HTML', () => {
   expect(vm.$el).toMatchSnapshot()
-})
+});
 ```
 
 Это создаст файл `test/__snapshots__/App.test.js.snap`. Давайте откроем и изучим его:
@@ -207,25 +208,25 @@ import { shallowMount } from '@vue/test-utils'
 import App from '../src/App'
 
 describe('App.test.js', () => {
-  let cmp
+  let cmp;
 
   beforeEach(() => {
     cmp = shallowMount(App, { // Создать поверхностный экземпляр компонента
       data: {
         messages: ['Cat']
       }
-    })
-  })
+    });
+  });
 
   it('сообщения идентичны ["Cat"]', () => {
     // Внутри cmp.vm, мы имеем доступ ко всем методам экземпляра Vue
     expect(cmp.vm.messages).toEqual(['Cat'])
-  })
+  });
 
   it('имеет ожидаемую структуру HTML', () => {
     expect(cmp.element).toMatchSnapshot()
-  })
-})
+  });
+});
 ```
 
 И теперь, если вы все ещё используете Jest в режиме просмотра, вы увидите, что тест все ещё проходит, но снимок не соответствует. Нажмите `u`, чтобы пересоздать его. Откройте и проверьте его снова:
@@ -261,16 +262,16 @@ describe('MessageList.test.js', () => {
       propsData: {
         messages: ['Cat']
       }
-    })
-  })
+    });
+  });
 
   it('получен массив ["Cat"] во входном параметре сообщения', () => {
     expect(cmp.vm.messages).toEqual(['Cat'])
-  })
+  });
 
   it('имеет ожидаемую структуру HTML', () => {
     expect(cmp.element).toMatchSnapshot()
-  })
+  });
 })
 ```
 

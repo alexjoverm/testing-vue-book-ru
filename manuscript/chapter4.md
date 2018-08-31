@@ -1,4 +1,4 @@
-# Тестирование свойств и пользовательских событий в компонентах Vue.js
+# Тестирование свойств и пользовательских событий в компонентах Vue.js {#chapter-4}
 
 Существуют различные способы тестирования свойств и событий, включая пользовательские.
 
@@ -20,7 +20,7 @@ describe('Message.test.js', () => {
 
   describe('Свойства', () => {
     // @TODO
-  })
+  });
 })
 ```
 
@@ -29,7 +29,7 @@ describe('Message.test.js', () => {
 Затем мы создадим вспомогательную фабричную функцию для создания компонента сообщения, предоставим некоторые свойства
 
 ```javascript
-const createCmp = propsData => mount(Message, { propsData })
+const createCmp = propsData => mount(Message, { propsData });
 ```
 
 ### Тестирование существование свойства
@@ -38,8 +38,8 @@ const createCmp = propsData => mount(Message, { propsData })
 
 ```javascript
 it('есть свойство message', () => {
-  cmp = createCmp({ message: 'hey' })
-  expect(cmp.props().message).toBe('hey')
+  cmp = createCmp({ message: 'hey' });
+  expect(cmp.props().message).toBe('hey');
 })
 ```
 
@@ -47,8 +47,8 @@ it('есть свойство message', () => {
 
 ```javascript
 it('входной параметр `cat` не определён', () => {
-  cmp = createCmp({ cat: 'hey' })
-  expect(cmp.props().cat).toBeUndefined()
+  cmp = createCmp({ cat: 'hey' });
+  expect(cmp.props().cat).toBeUndefined();
 })
 ```
 
@@ -57,7 +57,7 @@ it('входной параметр `cat` не определён', () => {
 ```javascript
 it('обычное свойство `cat` существует', () => {
   cmp = createCmp({ cat: 'hey' });
-  expect(cmp.attributes().cat).toBe('hey')
+  expect(cmp.attributes().cat).toBe('hey');
 })
 ```
 
@@ -77,8 +77,8 @@ props: {
 
 ```javascript
 it('Имя по умолчанию — Петя', () => {
-  cmp = createCmp({ message: 'hey' })
-  expect(cmp.props().author).toBe('Петя')
+  cmp = createCmp({ message: 'hey' });
+  expect(cmp.props().author).toBe('Петя');
 })
 ```
 
@@ -121,11 +121,11 @@ props: {
 
 ```javascript
 it('message is of type string', () => {
-  let spy = jest.spyOn(console, 'error')
-  cmp = createCmp({ message: 1 })
-  expect(spy).toBeCalledWith(expect.stringContaining('[Vue warn]: Invalid prop'))
+  let spy = jest.spyOn(console, 'error');
+  cmp = createCmp({ message: 1 });
+  expect(spy).toBeCalledWith(expect.stringContaining('[Vue warn]: Invalid prop'));
 
-  spy.mockReset() // Или mockRestore(), чтобы полностью удалить mock-объект
+  spy.mockReset(); // Или mockRestore(), чтобы полностью удалить mock-объект
 })
 ```
 
@@ -161,21 +161,21 @@ describe('Message.test.js', () => {
   describe('Свойства', () => {
     // ...
     describe('Тестирование корректности проверки свойств', () => {
-      const message = createCmp().vm.$options.props.message
+      const message = createCmp().vm.$options.props.message;
 
       it('Входной параметр message имеет строковый тип', () => {
         expect(message.type).toBe(String)
-      })
+      });
 
       it('Входной параметр message является обязательным', () => {
         expect(message.required).toBeTruthy()
-      })
+      });
 
       it('Входной параметр message имеет по крайней мере длину в два символа', () => {
         expect(message.validator && message.validator('a')).toBeFalsy()
         expect(message.validator && message.validator('aa')).toBeTruthy()
-      })
-    })
+      });
+    });
 ```
 
 ## Пользовательские события
@@ -194,24 +194,24 @@ describe('Message.test.js', () => {
 
 ```html
 <template>
-    <li
-      style="margin-top: 10px"
-      class="message"
-      @click="handleClick">
-        {{message}}
-    </li>
+  <li
+    style="margin-top: 10px"
+    class="message"
+    @click="handleClick">
+      {{message}}
+  </li>
 </template>
 
 <script>
-  export default {
-    name: 'Message',
-    props: ['message'],
-    methods: {
-      handleClick() {
-        this.$emit('message-clicked', this.message)
-      }
+export default {
+  name: 'Message',
+  props: ['message'],
+  methods: {
+    handleClick() {
+      this.$emit('message-clicked', this.message)
     }
   }
+};
 </script>
 ```
 
@@ -219,13 +219,13 @@ describe('Message.test.js', () => {
 
 ```html
 <template>
-    <ul>
-        <Message
-          @message-clicked="handleMessageClick"
-          :message="message"
-          v-for="message in messages"
-          :key="message"/>
-    </ul>
+  <ul>
+    <Message
+      @message-clicked="handleMessageClick"
+      :message="message"
+      v-for="message in messages"
+      :key="message"/>
+  </ul>
 </template>
 
 <script>
@@ -242,19 +242,19 @@ export default {
   components: {
     Message
   }
-}
+};
 </script>
 ```
 
 Теперь пришло время написать модульный тест. Создайте вложенный `describe` в файле `test/Message.spec.js` и подготовьте заглушку для тестового сценария _"Проверить, что компоненты `Message` запускают событие `message-clicked` при нажатии на сообщение"_, про которое было написано ранее:
 
 ```javascript
-...
+//...
 describe('Message.test.js', () => {
-  ...
+  // ...
   describe('События', () => {
     beforeEach(() => {
-      cmp = createCmp({ message: 'Cat' })
+      cmp = createCmp({ message: 'Cat' });
     })
 
     it('вызывается handleClick после клика на сообщение', () => {
@@ -272,11 +272,11 @@ The first thing we can test is that when clicking a message, the `handleClick` f
 
 ```javascript
 it('вызывается handleClick после клика на сообщение', () => {
-  const spy = spyOn(cmp.vm, 'handleClick')
-  // cmp.update() // Не требуется с версии v1.0.0-beta.12
+  const spy = spyOn(cmp.vm, 'handleClick');
+  // cmp.update() // Не требуется с vue-test-utils версии 1.0.0-beta.12
 
-  const el = cmp.find('.message').trigger('click')
-  expect(cmp.vm.handleClick).toBeCalled()
+  const el = cmp.find('.message').trigger('click');
+  expect(cmp.vm.handleClick).toBeCalled();
 })
 ```
 
@@ -287,10 +287,10 @@ it('вызывается handleClick после клика на сообщени
 
 ```javascript
 it('вызывается handleClick при клике на сообщение', () => {
-  cmp.vm.handleClick = jest.fn()
+  cmp.vm.handleClick = jest.fn();
 
-  const el = cmp.find('.message').trigger('click')
-  expect(cmp.vm.handleClick).toBeCalled()
+  const el = cmp.find('.message').trigger('click');
+  expect(cmp.vm.handleClick).toBeCalled();
 })
 ```
 
@@ -300,11 +300,11 @@ it('вызывается handleClick при клике на сообщение',
 
 ```javascript
 it('вызывается handleClick при клике на сообщение', () => {
-  const stub = jest.fn()
-  cmp.setMethods({ handleClick: stub })
+  const stub = jest.fn();
+  cmp.setMethods({ handleClick: stub });
 
-  const el = cmp.find('.message').trigger('click')
-  expect(stub).toBeCalled()
+  const el = cmp.find('.message').trigger('click');
+  expect(stub).toBeCalled();
 })
 ```
 
@@ -316,11 +316,11 @@ it('вызывается handleClick при клике на сообщение',
 
 ```javascript
 it('запускает событие message-clicked при вызове метода handleClick', () => {
-  const stub = jest.fn()
-  cmp.vm.$on('message-clicked', stub)
-  cmp.vm.handleClick()
+  const stub = jest.fn();
+  cmp.vm.$on('message-clicked', stub);
+  cmp.vm.handleClick();
 
-  expect(stub).toBeCalledWith('Cat')
+  expect(stub).toBeCalledWith('Cat');
 })
 ```
 
@@ -334,11 +334,11 @@ it('запускает событие message-clicked при вызове мет
 
 ```javascript
 it('вызывается handleMessageClick при срабатывании @message-click', () => {
-    const stub = jest.fn()
-    cmp.setMethods({ handleMessageClick: stub })
-    const el = cmp.find('.message').vm.$emit('message-clicked', 'Cat')
+    const stub = jest.fn();
+    cmp.setMethods({ handleMessageClick: stub });
+    const el = cmp.find('.message').vm.$emit('message-clicked', 'Cat');
 
-    expect(stub).toBeCalledWith('Cat')
+    expect(stub).toBeCalledWith('Cat');
 })
 ```
 
@@ -350,9 +350,9 @@ it('вызывается handleMessageClick при срабатывании @mes
 it('вызывается handleMessageClick при срабатывании @message-click', () => {
     // Файл `Message.test.js`:
   
-    const el = cmp.find('.message').vm.$emit('message-clicked', 'Cat')
+    const el = cmp.find('.message').vm.$emit('message-clicked', 'Cat');
 
-    expect(cmp.emitted()['message-clicked'][0]).toEqual(['Cat'])
+    expect(cmp.emitted()['message-clicked'][0]).toEqual(['Cat']);
 })
 ```
 
