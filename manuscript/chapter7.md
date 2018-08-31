@@ -281,14 +281,14 @@ it('Длина сообщения превышает 5 символов', () => 
 
 Метод `findAll` возвращает объект, содержащий массив `wrappers`, где мы можем получить доступ к свойству экземпляра компонента `vm`. Этот тест завершится неудачно, потому что сообщение имеет длину 3, поэтому перейдите к функции `beforeEach` и увеличьте длину сообщение:
 
-```javascript
-beforeEach(() => {
-  const messageWrapper = {
-    render(h) {
-      return h(Message, { props: { message: 'привет' } });
-    }
-  };
-// ...
+{lang=javascript}
+    beforeEach(() => {
+      const messageWrapper = {
+        render(h) {
+          return h(Message, { props: { message: 'привет' } });
+        }
+      };
+    // ...
 ```
 
 Затем этот тест должен пройти.
