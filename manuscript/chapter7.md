@@ -6,116 +6,109 @@
 
 Они создают структуру компонентов более гибкой, перенося ответственность за управление состоянием на родительский компонент. Например, у нас может быть компонент `List` и другого рода компоненты элементов, такие как `ListItem` и `ListItemImage`. Они будут использоваться как показано ниже:
 
-```html
-<template>
-  <List>
-    <ListItem :someProp="someValue" />
-    <ListItem :someProp="someValue" />
-    <ListItemImage :image="imageUrl" :someProp="someValue" />
-  </List>
-</template>
-```
+{lang=html}
+    <template>
+      <List>
+        <ListItem :someProp="someValue" />
+        <ListItem :someProp="someValue" />
+        <ListItemImage :image="imageUrl" :someProp="someValue" />
+      </List>
+    </template>
 
 Внутреннее содержимое `List` — это сам слот, доступный через тег `<slot>`. Таким образом, реализация `List` выглядит так:
 
-```html
-<template>
-  <ul>
-    <!-- слот будет равен тому, что внутри <List> -->
-    <slot></slot>
-  </ul>
-</template>
-```
+{lang=html}
+    <template>
+      <ul>
+        <!-- слот будет равен тому, что внутри <List> -->
+        <slot></slot>
+      </ul>
+    </template>
 
 И, скажем, что элемент `ListItem` выглядит так:
 
-```html
-<template>
-  <li>{{ someProp }}</li>
-</template>
-```
+{lang=html}
+    <template>
+      <li>{{ someProp }}</li>
+    </template>
 
 Тогда окончательный результат, отрисованный Vue.js, будет следующим:
 
-```html
-<ul>
-  <li>someValue</li>
-  <li>someValue</li>
-  <li>someValue</li> <!-- предположим, что реализация одна и та же для ListItemImage -->
-</ul>
-```
+{lang=html}
+    <ul>
+      <li>someValue</li>
+      <li>someValue</li>
+      <li>someValue</li> <!-- предположим, что реализация одна и та же для ListItemImage -->
+    </ul>
 
 ## Создание MessageList на основе слотов
 
 Давайте посмотрим на компонент `MessageList.vue`:
 
-```html
-<template>
-  <ul>
-    <Message
-      @message-clicked="handleMessageClick"
-      :message="message"
-      v-for="message in messages"
-      :key="message"
-    />
-  </ul>
-</template>
-```
+{lang=html}
+    <template>
+      <ul>
+        <Message
+          @message-clicked="handleMessageClick"
+          :message="message"
+          v-for="message in messages"
+          :key="message"
+        />
+      </ul>
+    </template>
 
 Компонент `MessageList` имеет «жёстко закодированный» компонент `Message` внутри. В некотором смысле это более автоматизировано, но в другом случае такой компонент не является гибким. Что делать, если вы хотите иметь разные типы компонентов `Message`? Как насчёт изменения его структуры или стилизации? Вот где слоты пригодятся.
 
 Давайте будем использовать `Message.vue` для использования слотов. Сначала переместите эту часть `<Message...` в компонент `App.vue`, вместе с методом `handleMessageClick`, потому что он использовался извне:
 
-```html
-<template>
-  <div id="app">
-    <MessageList>
-      <Message
-        @message-clicked="handleMessageClick"
-        :message="message"
-        v-for="message in messages"
-        :key="message"/>
-    </MessageList>
-  </div>
-</template>
+{lang=html}
+    <template>
+      <div id="app">
+        <MessageList>
+          <Message
+            @message-clicked="handleMessageClick"
+            :message="message"
+            v-for="message in messages"
+            :key="message"/>
+        </MessageList>
+      </div>
+    </template>
 
-<script>
-import MessageList from './components/MessageList';
-import Message from './components/Message';
+    <script>
+    import MessageList from './components/MessageList';
+    import Message from './components/Message';
 
-export default {
-  name: 'app',
-  data: () => ({ messages: ['Привет, Джон', 'Как дела, Пако?'] }),
-  methods: {
-    handleMessageClick(message) {
-      console.log(message);
-    }
-  },
-  components: {
-    MessageList,
-    Message
-  }
-};
-</script>
-```
+    export default {
+      name: 'app',
+      data: () => ({ messages: ['Привет, Джон', 'Как дела, Пако?'] }),
+      methods: {
+        handleMessageClick(message) {
+          console.log(message);
+        }
+      },
+      components: {
+        MessageList,
+        Message
+      }
+    };
+    </script>
 
 Не забудьте импортировать компонент `Message` и добавить его в опцию `components` в `App.vue`.
 
 Затем в `MessageList.vue` мы можем удалить ссылки на `Message`, в итоге он будет выглядеть так:
 
-```html
-<template>
-  <ul class="list-messages">
-    <slot></slot>
-  </ul>
-</template>
+{lang=html}
+    <template>
+      <ul class="list-messages">
+        <slot></slot>
+      </ul>
+    </template>
 
-<script>
-export default {
-  name: 'MessageList'
-};
-</script>
-```
+    <script>
+    export default {
+      name: 'MessageList'
+    };
+    </script>
 
 ## Свойства экземпляра `$children` и `$slots`
 
@@ -126,11 +119,10 @@ Vue-компоненты имеют две свойства экземпляра
 
 Объект `$slots` имеет больше доступных данных. Фактически, `$children` — это всего лишь часть переменной `$slots`, к которой можно получить доступ таким же образом путём доступа к `$slots.default`, отфильтрованного экземплярами Vue-компонента:
 
-```javascript
-const children = this.$slots.default
-  .map(vnode => vnode.componentInstance)
-  .filter(cmp => !!cmp)
-```
+{lang=javascript}
+    const children = this.$slots.default
+      .map(vnode => vnode.componentInstance)
+      .filter(cmp => !!cmp)
 
 ## Тестирование слотов
 
@@ -140,125 +132,117 @@ const children = this.$slots.default
 
 Единственное, что мы можем проверить, — убедиться, что компоненты `Message` находятся в элементе `ul` с классом `list-messages`. Для передачи слотов компоненту `MessageList`, мы можем использовать свойство `slots` объекта опций у методов `mount` или `shallowMount`. Итак, давайте создадим метод [`beforeEach`](https://jestjs.io/docs/en/api.html#beforeeachfn-timeout) со следующим кодом:
 
-```javascript
-beforeEach(() => {
-  cmp = shallowMount(MessageList, {
-    slots: {
-      default: '<div class="fake-msg"></div>'
-    }
-  });
-});
-```
+{lang=javascript}
+    beforeEach(() => {
+      cmp = shallowMount(MessageList, {
+        slots: {
+          default: '<div class="fake-msg"></div>'
+        }
+      });
+    });
 
 Поскольку мы просто хотим проверить, отрисовываются ли сообщения, мы можем искать `<div class="fake-msg"></div>` следующим образом:
 
-```javascript
-it('Сообщения добавлены в элемент ul.list-messages', () => {
-  const list = cmp.find('ul.list-messages');
-  expect(list.findAll('.fake-msg').length).toBe(1);
-})
-```
+{lang=javascript}
+    it('Сообщения добавлены в элемент ul.list-messages', () => {
+      const list = cmp.find('ul.list-messages');
+      expect(list.findAll('.fake-msg').length).toBe(1);
+    })
 
 И это должно пройти успешно. Опция `slots` также принимает объявление компонента и даже массив, поэтому мы могли бы написать:
 
-```javascript
-import AnyComponent from 'anycomponent';
-// ...
-shallowMount(MessageList, {
-  slots: {
-    default: AnyComponent // Или [AnyComponent, AnyComponent]
-  }
-});
-```
+{lang=javascript}
+    import AnyComponent from 'anycomponent';
+    // ...
+    shallowMount(MessageList, {
+      slots: {
+        default: AnyComponent // Или [AnyComponent, AnyComponent]
+      }
+    });
 
 Проблема с этой опцией заключается в том, что она очень ограничена, например, вы не можете переопределять входные параметры, как в данном случае нам нужно это для компонента `Message`, так как он имеет обязательное свойство. Это должно повлиять на случаи, когда вам на самом деле нужны для тестирования слотов с ожидаемыми компонентами. Например, если вы хотите удостовериться, что `MessageList` ожидает только `Message` в качестве слотов. Такой возможности во Vue Test Utils нет, вы можете почитать обсуждение в соответствующей [ишью](https://github.com/vuejs/vue-test-utils/issues/41#issue-255235880): можно передать только компонент, но не экземпляр.
 
 В качестве обходного решения мы можем воспользоваться [render-функцией](https://ru.vuejs.org/v2/guide/render-function.html). Поэтому мы можем переписать тест, чтобы быть более точным:
 
-```javascript
-beforeEach(() => {
-  const messageWrapper = {
-    render(h) {
-      return h(Message, { props: { message: 'hey' } })
-    }
-  };
+{lang=javascript}
+    beforeEach(() => {
+      const messageWrapper = {
+        render(h) {
+          return h(Message, { props: { message: 'hey' } })
+        }
+      };
 
-  cmp = shallowMount(MessageList, {
-    slots: {
-      default: messageWrapper
-    }
-  });
-});
+      cmp = shallowMount(MessageList, {
+        slots: {
+          default: messageWrapper
+        }
+      });
+    });
 
-it('Сообщения добавлены в элементе ul.list-messages', () => {
-  const list = cmp.find(MessageList)
-  expect(list.find(Message).isVueInstance()).toBe(true)
-});
-```
+    it('Сообщения добавлены в элементе ul.list-messages', () => {
+      const list = cmp.find(MessageList)
+      expect(list.find(Message).isVueInstance()).toBe(true)
+    });
 
 ## Тестирование именованных слотов
 
 Неименованный слот, который мы использовали выше, называется _слотом по умолчанию_, но у нас может быть несколько слотов, используя именованный слот. Давайте добавим заголовок к компоненту `MessageList.vue`:
 
-```html
-<template>
-  <div>
-    <header class="list-header">
-      <slot name="header">
-        Это заголовок по умолчанию
-      </slot>
-    </header>
-    <ul class="list-messages">
-      <slot></slot>
-    </ul>
-  </div>
-</template>
-```
+{lang=html}
+    <template>
+      <div>
+        <header class="list-header">
+          <slot name="header">
+            Это заголовок по умолчанию
+          </slot>
+        </header>
+        <ul class="list-messages">
+          <slot></slot>
+        </ul>
+      </div>
+    </template>
 
 Используя `<slot name="header">`, мы определяем ещё один слот для заголовка. Вы можете увидеть текст `Это заголовок по умолчанию` внутри слота, который отображается как контент по умолчанию, когда слот не передаётся компоненту, это также относится к слоту по умолчанию.
 
 Затем из `App.vue` мы можем использовать добавление заголовка к компоненту` MessageList` с помощью атрибута `slot="header"`:
 
-```html
-<template>
-  <div id="app">
-    <MessageList>
-      <header slot="header">
-        Потрясающий заголовок
-      </header>
-      <Message
-        @message-clicked="handleMessageClick"
-        :message="message"
-        v-for="message in messages"
-        :key="message"/>
-    </MessageList>
-  </div>
-</template>
-```
+{lang=html}
+    <template>
+      <div id="app">
+        <MessageList>
+          <header slot="header">
+            Потрясающий заголовок
+          </header>
+          <Message
+            @message-clicked="handleMessageClick"
+            :message="message"
+            v-for="message in messages"
+            :key="message"/>
+        </MessageList>
+      </div>
+    </template>
 
 Пришло время написать для него модульный тест. Тестирование именованных слотов точно такое же, как тестирование слота по умолчанию, тот же самый процесс. Таким образом, мы можем начать с тестирования того, что слот заголовка отображается в элементе `<header class="list-header">`, и он отрисовывает текст по умолчанию, когда ни один из слотов заголовка не передаётся. В `MessageList.test.js`:
 
-```javascript
-it('Слот заголовка отрисовывает текст заголовка по умолчанию', () => {
-  const header = cmp.find('.list-header')
-  expect(header.text().trim()).toBe('Это заголовок по умолчанию')
-})
-```
+{lang=javascript}
+    it('Слот заголовка отрисовывает текст заголовка по умолчанию', () => {
+      const header = cmp.find('.list-header')
+      expect(header.text().trim()).toBe('Это заголовок по умолчанию')
+    })
 
 Затем делаем то же самое, но проверка содержимого по умолчанию заменяется, когда мы имитируем слот заголовка:
 
-```javascript
-it('Слот заголовка отрисовывается внутри .list-header', () => {
-  const component = shallowMount(MessageList, {
-    slots: {
-      header: '<div>Какой удивительный заголовок</div>'
-    }
-  })
+{lang=javascript}
+    it('Слот заголовка отрисовывается внутри .list-header', () => {
+      const component = shallowMount(MessageList, {
+        slots: {
+          header: '<div>Какой удивительный заголовок</div>'
+        }
+      })
 
-  const header = component.find('.list-header')
-  expect(header.text().trim()).toBe('Какой удивительный заголовок')
-})
-```
+      const header = component.find('.list-header')
+      expect(header.text().trim()).toBe('Какой удивительный заголовок')
+    })
 
 Посмотрите, что слот заголовка, используемый в этом последнем тесте, завернут в `<div>`. Важно, чтобы слоты были обёрнуты тегом HTML, иначе Vue Test Utils будет жаловаться.
 
@@ -270,14 +254,13 @@ it('Слот заголовка отрисовывается внутри .list-
 
 Предположим, что по какой-либо причине в контексте компонента `MessageList` все компоненты `Message` должны иметь длину больше 5 символов во входном параметре `message`. Мы можем проверить это таким образом:
 
-```javascript
-it('Длина сообщения превышает 5 символов', () => {
-  const messages = cmp.findAll(Message)
-  messages.wrappers.forEach(c => {
-    expect(c.vm.message.length).toBeGreaterThan(5)
-  })
-})
-```
+{lang=javascript}
+    it('Длина сообщения превышает 5 символов', () => {
+      const messages = cmp.findAll(Message)
+      messages.wrappers.forEach(c => {
+        expect(c.vm.message.length).toBeGreaterThan(5)
+      })
+    })
 
 Метод `findAll` возвращает объект, содержащий массив `wrappers`, где мы можем получить доступ к свойству экземпляра компонента `vm`. Этот тест завершится неудачно, потому что сообщение имеет длину 3, поэтому перейдите к функции `beforeEach` и увеличьте длину сообщение:
 
@@ -289,7 +272,6 @@ it('Длина сообщения превышает 5 символов', () => 
         }
       };
     // ...
-```
 
 Затем этот тест должен пройти.
 

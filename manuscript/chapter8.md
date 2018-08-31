@@ -4,15 +4,13 @@
 
 Менеджеры модулей, которые у нас есть в сообществе JavaScript, главным образом ES-модули и CommonJS, не поддерживают пути на основе проектов. Они поддерживают только относительные пути для наших собственных модулей и пути для каталога `node_modules`. Когда проект немного растёт, обычно встречаются такие пути:
 
-```javascript
-import SomeComponent from '../../../../components/SomeComponent';
-```
+{lang=javascript}
+    import SomeComponent from '../../../../components/SomeComponent';
 
 К счастью, у нас есть разные способы справиться с этим, таким образом мы могли определить псевдонимы для каталог относительно корня проекта, поэтому мы могли бы использовать написать приведённую выше строку так, как показано ниже:
 
-```javascript
-import SomeComponent from '@/components/SomeComponent';
-```
+{lang=javascript}
+    import SomeComponent from '@/components/SomeComponent';
 
 Знак `@` здесь является произвольным символом для определения корневого проекта, вы можете определить свой собственный. Давайте посмотрим, какие решения мы можем применить для псевдонимов модулей. Начнём [с того места, где мы остановились в предыдущей главе](https://github.com/alexjoverm/vue-testing-series/tree/test-slots).
 
@@ -20,55 +18,51 @@ import SomeComponent from '@/components/SomeComponent';
 
 [Псевдонимы Webpack](https://webpack.js.org/configuration/resolve/#resolve-alias) очень просты в настройке. Вам просто нужно добавить свойство `resolve.alias` в конфигурацию вашего webpack. Если вы посмотрите на `build/webpack.base.conf.js`, там уже определён один псевдоним:
 
-```javascript
-module.exports = {
-  // ...
-  resolve: {
-    extensions: ['.js', '.vue', '.json'],
-    alias: {
-      'vue$': 'vue/dist/vue.esm.js',
-    }
-  }
-};
-```
+{lang=javascript}
+    module.exports = {
+      // ...
+      resolve: {
+        extensions: ['.js', '.vue', '.json'],
+        alias: {
+          'vue$': 'vue/dist/vue.esm.js',
+        }
+      }
+    };
 
 Принимая это как точку входа, мы можем добавить простой псевдоним, указывающий на папку `src`, и использовать его в качестве корня проекта:
 
-```javascript
-module.exports = {
-  // ...
-  resolve: {
-    extensions: ['.js', '.vue', '.json'],
-    alias: {
-      'vue$': 'vue/dist/vue.esm.js',
-      '@': path.join(__dirname, '..', 'src')
-    }
-  }
-};
-```
+{lang=javascript}
+    module.exports = {
+      // ...
+      resolve: {
+        extensions: ['.js', '.vue', '.json'],
+        alias: {
+          'vue$': 'vue/dist/vue.esm.js',
+          '@': path.join(__dirname, '..', 'src')
+        }
+      }
+    };
 
 Теперь благодаря этому мы можем получить доступ к чему-либо, взяв корневой проект как символ `@`. Перейдём к `src/App.vue` и изменим импорт на эти два компонента:
 
-```javascript
-import MessageList from '@/components/MessageList';
-import Message from '@/components/Message';
-// ...
-```
+{lang=javascript}
+    import MessageList from '@/components/MessageList';
+    import Message from '@/components/Message';
+    // ...
 
 И если мы запустим `npm start` и откроем браузер по URL-адресу `localhost: 8080`, это должно работать из коробки.
 
 Однако, если мы попытаемся выполнить тесты, запустив `npm t`, мы увидим, что Jest не находит модули. Мы все ещё не настроили Jest для работы псевдонимов модулей. Итак, перейдём к `package.json`, где находится конфигурация Jest, и добавим `"@/([^\\.]*)$": "<rootDir>/src/$1"` в `moduleNameMapper`:
 
-```json
-{
-  "jest": {
-    "moduleNameMapper": {
-      "@(.*)$": "<rootDir>/src/$1",
-      "^vue$": "vue/dist/vue.common.js"
+{lang=json}
+    {
+      "jest": {
+        "moduleNameMapper": {
+          "@(.*)$": "<rootDir>/src/$1",
+          "^vue$": "vue/dist/vue.common.js"
+        }
+      }
     }
-  }
-}
-```
 
 Давайте объясним это:
 
@@ -79,11 +73,10 @@ import Message from '@/components/Message';
 
 Это действительно так. Теперь вы можете даже обновить файл `App.test.js`, чтобы использовать псевдоним, поскольку теперь он может использоваться в тестах:
 
-```javascript
-import { shallowMount } from '@vue/test-utils'
-import App from "@/App"
-// ...
-```
+{lang=javascript}
+    import { shallowMount } from '@vue/test-utils'
+    import App from "@/App"
+    // ...
 
 И это будет работать для файлов `.vue` и `.js`.
 
@@ -93,40 +86,37 @@ import App from "@/App"
 
 Давайте добавим псевдоним `components` в `build/webpack.base.conf.js`:
 
-```javascript
-module.exports = {
-  // ...
-  resolve: {
-    extensions: ['.js', '.vue', '.json'],
-    alias: {
-      'vue$': 'vue/dist/vue.esm.js',
-      '@': path.join(__dirname, '..', 'src')
-      'components': path.join(__dirname, '..', 'src', 'components')
-    }
-  }
-};
-```
+{lang=javascript}
+    module.exports = {
+      // ...
+      resolve: {
+        extensions: ['.js', '.vue', '.json'],
+        alias: {
+          'vue$': 'vue/dist/vue.esm.js',
+          '@': path.join(__dirname, '..', 'src')
+          'components': path.join(__dirname, '..', 'src', 'components')
+        }
+      }
+    };
 
 Затем нам просто нужно добавить его также в конфигурацию Jest в `package.json`:
 
-```json
-{
-  "jest": {
-    "moduleNameMapper": {
-      "@(.*)$": "<rootDir>/src/$1",
-      "components(.*)$": "<rootDir>/src/components/$1",
-      "^vue$": "vue/dist/vue.common.js"
+{lang=json}
+    {
+      "jest": {
+        "moduleNameMapper": {
+          "@(.*)$": "<rootDir>/src/$1",
+          "components(.*)$": "<rootDir>/src/components/$1",
+          "^vue$": "vue/dist/vue.common.js"
+        }
+      }
     }
-  }
-}
-```
 
 Вот так просто. Теперь мы можем попробовать в `App.vue` использовать обе формы:
 
-```javascript
-import MessageList from 'components/MessageList';
-import Message from '@/components/Message';
-```
+{lang=javascript}
+    import MessageList from 'components/MessageList';
+    import Message from '@/components/Message';
 
 Остановите и перезапустите выполнение тестов, и это должно работать, а также если вы запустите `npm start` и попробуйте, что из этого выйдет.
 

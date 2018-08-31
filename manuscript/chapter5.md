@@ -8,49 +8,46 @@
 
 Вычисляемые свойства — это простые реактивные функции, которые возвращают данные в другой форме. Они ведут себя точно так же, как стандартные свойства `get/set` в языке:
 
-```javascript
-class X {
-  // ...
+{lang=javascript}
+    class X {
+      // ...
 
-  get fullName() {
-    return `${this.name} ${this.surname}`
-  }
-
-  set fullName() {
-    // ...
-  }
-}
-```
-
-Фактически, когда вы создаёте компоненты Vue на основе классов, как я объясняю в своём [курсе на Egghead «Использование TypeScript для разработки веб-приложений Vue.js»](https://egghead.io/courses/use-typescript-to-develop-vue-js-web-applications) (на английском), вы напишете вычисляемые свойства именно так. Если вы используете обычные объекты, это будет так, как показано ниже:
-
-```javascript
-export default {
-  // ...
-  computed: {
-    fullName() {
-      return `${this.name} ${this.surname}`
-    }
-  }
-};
-```
-
-И вы даже можете добавить `set` следующим образом:
-
-```javascript
-export default {
-  computed: {
-    fullName: {
-      get() {
+      get fullName() {
         return `${this.name} ${this.surname}`
-      },
-      set() {
+      }
+
+      set fullName() {
         // ...
       }
     }
-  }
-};  
-```
+
+Фактически, когда вы создаёте компоненты Vue на основе классов, как я объясняю в своём [курсе на Egghead «Использование TypeScript для разработки веб-приложений Vue.js»](https://egghead.io/courses/use-typescript-to-develop-vue-js-web-applications) (на английском), вы напишете вычисляемые свойства именно так. Если вы используете обычные объекты, это будет так, как показано ниже:
+
+{lang=javascript}
+    export default {
+      // ...
+      computed: {
+        fullName() {
+          return `${this.name} ${this.surname}`
+        }
+      }
+    };
+
+И вы даже можете добавить `set` следующим образом:
+
+{lang=javascript}
+    export default {
+      computed: {
+        fullName: {
+          get() {
+            return `${this.name} ${this.surname}`
+          },
+          set() {
+            // ...
+          }
+        }
+      }
+    };
 
 ### Тестирование вычисляемых свойств
 
@@ -58,66 +55,63 @@ export default {
 
 Прежде всего, создайте компонент `Form.vue`:
 
-```html
-<template>
-  <div>
-    <form action="">
-      <input type="text" v-model="inputValue">
-      <span class="reversed">{{ reversedInput }}</span>
-    </form>
-  </div>
-</template>
+{lang=html}
+    <template>
+      <div>
+        <form action="">
+          <input type="text" v-model="inputValue">
+          <span class="reversed">{{ reversedInput }}</span>
+        </form>
+      </div>
+    </template>
 
-<script>
-export default {
-  props: ['reversed'],
-  data: () => ({
-    inputValue: ''
-  }),
-  computed: {
-    reversedInput() {
-      return this.reversed ?
-        this.inputValue.split('').reverse().join('') :
-        this.inputValue
-    }
-  }
-};
-</script>
-```
+    <script>
+    export default {
+      props: ['reversed'],
+      data: () => ({
+        inputValue: ''
+      }),
+      computed: {
+        reversedInput() {
+          return this.reversed ?
+            this.inputValue.split('').reverse().join('') :
+            this.inputValue
+        }
+      }
+    };
+    </script>
 
 Он будет показывать введённое в поле ввода значение, а рядом с ним ту же строку, но перевёрнутую наоборот. Это всего лишь простой пример, но это достаточно для проверки вычисляемого свойства.
 
 Теперь сделайте изменения в `App.vue`, импортировав созданный компонент `Form` сразу после `MessageList` и не забудьте включить его в свойство объекта `components`. Затем создайте `test/Form.test.js` со стандартной заглушкой, которую мы уже использовали в других тестах:
 
-```javascript
-import { shallowMount } from '@vue/test-utils';
-import Form from '../src/components/Form';
+{lang=javascript}
+    import { shallowMount } from '@vue/test-utils';
+    import Form from '../src/components/Form';
 
-describe('Form.test.js', () => {
-  let cmp;
+    describe('Form.test.js', () => {
+      let cmp;
 
-  beforeEach(() => {
-    cmp = shallowMount(Form);
-  });
-});
-```
+      beforeEach(() => {
+        cmp = shallowMount(Form);
+      });
+    });
 
 Теперь создайте набор тестов с двумя тестовыми сценариями:
 
-```javascript
-describe('Свойства', () => {
-  it('возвращает строку в обычном порядке, если свойство reversed не равняется true', () => {
-      cmp.setData({ inputValue: 'Yoo' });
-      expect(cmp.vm.reversedInput).toBe('Yoo');
-  })
+{lang=javascript}
+    describe('Свойства', () => {
+      it('возвращает строку в обычном порядке, если свойство reversed не равняется true', () => {
+        cmp.setData({ inputValue: 'Yoo' });
+        expect(cmp.vm.reversedInput).toBe('Yoo');
+      });
 
-  it('возвращает перевёрнутую строку, если свойство reversed равняется true', () => {
-      cmp.setData({ inputValue: 'Yoo' });
-      cmp.setProps({ reversed: true });
-      expect(cmp.vm.reversedInput).toBe('ooY');
-  })
-})
-```
+      it('возвращает перевёрнутую строку, если свойство reversed равняется true', () => {
+        cmp.setData({ inputValue: 'Yoo' });
+        cmp.setProps({ reversed: true });
+        expect(cmp.vm.reversedInput).toBe('ooY');
+      });
+    });
 
 Мы можем получить доступ к экземпляру компонента в `cmp.vm`, т.е. к внутреннему свойству, вычисляемым свойствам и методам. Теперь для тестирования, нам просто нужно изменить значение и убедиться, что возвращается одинаковая строка, если входной параметр `reversed` равен `false`.
 
@@ -135,15 +129,14 @@ describe('Свойства', () => {
 
 Предположим, мы хотим что-то сделать, когда изменится `inputValue` из состояния. Мы могли бы выполнить AJAX-запрос, но поскольку это более сложно, и мы увидим это в следующем уроке, а пока давайте просто напишем `console.log`. Добавьте свойство `watch` в опции компонента `Form.vue`:
 
-```javascript
-watch: {
-  inputValue(newVal, oldVal) {
-    if (newVal.trim().length && newVal !== oldVal) {
-      console.log(newVal);
+{lang=javascript}
+    watch: {
+      inputValue(newVal, oldVal) {
+        if (newVal.trim().length && newVal !== oldVal) {
+          console.log(newVal);
+        }
+      }
     }
-  }
-}
-```
 
 Обратите внимание, что функция-наблюдатель `inputValue` соответствует имени переменной состояния. По соглашению, Vue будет искать его в состоянии объектов `properties` и `data`, используя имя watch-функции, в этом случае это `inputValue`, который можно найти в `data`, и он добавит наблюдателя туда.
 
@@ -151,94 +144,88 @@ watch: {
 
 Что мы должны протестировать в функции-наблюдателе? Ну, об этом мы ещё поговорим далее в следующем уроке, когда затронем методы тестирования, но предположим, что мы просто хотим знать, что она вызывает `console.log`, когда это нужно. Итак, давайте добавим заготовку для набора тестов наблюдателей в `Form.test.js`:
 
-```javascript
-describe('Form.test.js', () => {
-  let cmp;
+{lang=javascript}
+    describe('Form.test.js', () => {
+      let cmp;
 
-  describe('Наблюдатели - inputValue', () => {
-    let spy;
+      describe('Наблюдатели - inputValue', () => {
+        let spy;
 
-    beforeAll(() => {
-      spy = jest.spyOn(console, 'log');
+        beforeAll(() => {
+          spy = jest.spyOn(console, 'log');
+        });
+
+        afterEach(() => {
+          spy.mockClear();
+        });
+
+        it('не вызывается, если значение пустое (с удалением пробелов)', () => {
+          // @TODO
+        });
+
+        it('не вызывается, если значение одно и то же', () => {
+          // @TODO
+        });
+
+        it('вызывается с новым значением в других случаях', () => {
+          // @TODO
+        });
+      });
     });
-
-    afterEach(() => {
-      spy.mockClear();
-    });
-
-    it('не вызывается, если значение пустое (с удалением пробелов)', () => {
-      // @TODO
-    });
-
-    it('не вызывается, если значение одно и то же', () => {
-      // @TODO
-    });
-
-    it('вызывается с новым значением в других случаях', () => {
-      // @TODO
-    });
-  });
-})
-```
 
 Мы используем шпион для метода `console.log`, инициализируем его перед началом каждого теста и перезапускаем его состояние после каждого из них, чтобы они начинались с нового шпиона.
 
 Для тестирования функции-наблюдателя, нам просто нужно изменить значение на другое, которое установлено для наблюдателя, в данном случае это состояние `inputValue`. Но здесь есть кое-что странное... давайте начнём с последнего теста.
 
-```javascript
-it('вызывается с новым значением в других случаях', () => {
-  cmp.vm.inputValue = 'foo';
-  expect(spy).toBeCalled();
-})
-```
+{lang=javascript}
+    it('вызывается с новым значением в других случаях', () => {
+      cmp.vm.inputValue = 'foo';
+      expect(spy).toBeCalled();
+    });
 
 Мы изменяем значение `inputValue`, поэтому теперь должен вызван шпион `console.log`, правильно? Да, но это не произойдёт... Но подождите, есть объяснение: в отличие от вычисляемых свойств выполнение наблюдателей **откладывается до следующего цикла обновления**, который Vue использует для поиска изменений. Получается здесь происходит то, что `console.log` действительно вызывается, но после завершения теста.
 
 Обратите внимание, что мы изменяем `inputValue` _непосредственным_ образом, обращаясь к свойству `vm`. Если мы изменяем свойство данных подобным образом, нам нужно использовать функцию [`vm.$nextTick`](https://ru.vuejs.org/v2/api/#vm-nextTick), чтобы отложить выполнение кода до следующего цикла обновления:
 
-```javascript
-it('вызывается с новым значением в других случаях', done => {
-  cmp.vm.inputValue = 'foo'
-  cmp.vm.$nextTick(() => {
-    expect(spy).toBeCalled();
-    done();
-  })
-})
-```
+{lang=javascript}
+    it('вызывается с новым значением в других случаях', done => {
+      cmp.vm.inputValue = 'foo'
+      cmp.vm.$nextTick(() => {
+        expect(spy).toBeCalled();
+        done();
+      });
+    });
 
 _В таком случае необходим вызов функции `done`, которую мы получаем в качестве параметра. Это [односторонний способ Jest](https://jestjs.io/docs/en/asynchronous.html) для проверки асинхронного кода._
 
 Однако есть **гораздо лучший способ**. Методы, предоставляемые Vue Test Utils, такие как `emitted` или `setData`, сами заботятся об этом, упрощая тем самым тестирование вычисляемых свойств.
 
-```javascript
-it('вызывается с новым значением в других случаях', () => {
-  cmp.setData({ inputValue: 'foo' });
-  expect(spy).toBeCalled();
-})
-```
+{lang=javascript}
+    it('вызывается с новым значением в других случаях', () => {
+      cmp.setData({ inputValue: 'foo' });
+      expect(spy).toBeCalled();
+    });
 
 Мы можем применить ту же стратегию для следующего теста, с той разницей, что шпион не следует вызывать:
 
-```javascript
-it('не вызывается, если значение пустое (с удалением пробелов)', next => {
-  cmp.setData({ inputValue: '   ' });
-  expect(spy).not.toBeCalled();
-})
-```
+{lang=javascript}
+    it('не вызывается, если значение пустое (с удалением пробелов)', next => {
+      cmp.setData({ inputValue: '   ' });
+      expect(spy).not.toBeCalled();
+    });
 
 Наконец, написание теста, где шпион `console.log` в методе-наблюдателе не должен вызываться при одинаковых значений, будет чуть сложнее. Внутреннее состояние по умолчанию пустое, поэтому сначала нам нужно его изменить, дождаться следующего тика, затем очистить mock-объект, чтобы сбросить количество вызовов, и изменить `inputValue` снова. Затем, после второго тика, мы можем проверить шпиона и закончить тест. Опять же, благодаря методам Vue Test Utils нам не требуется использовать `$nextTick`.
 
 Это может быть проще, если мы пересоздадим компонент в самом начале, переопределив свойство `data`. Помните, что вы можете переопределить любую опцию компонента, используя второй параметр функций `mount` или `shallowMount`:
 
-```javascript
-it('не вызывается, если значение одно и то же', () => {
-  cmp = shallowMount(Form, {
-    data: () => ({ inputValue: 'foo' })
-  });
-  cmp.setData({ inputValue: 'foo' });
-  expect(spy).not.toBeCalled();
-})
-```
+{lang=javascript}
+    it('не вызывается, если значение одно и то же', () => {
+      cmp = shallowMount(Form, {
+        data: () => ({ inputValue: 'foo' })
+      });
+      cmp.setData({ inputValue: 'foo' });
+      expect(spy).not.toBeCalled();
+    });
 
 ## Резюме
 

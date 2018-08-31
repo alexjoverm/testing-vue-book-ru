@@ -14,169 +14,157 @@ T> Чтобы передать свойства компонентам, испо
 
 Сначала создайте файл `Message.test.js` и добавьте следующий код:
 
-```javascript
-describe('Message.test.js', () => {
-  let cmp;
+{lang=javascript}
+    describe('Message.test.js', () => {
+      let cmp;
 
-  describe('Свойства', () => {
-    // @TODO
-  });
-})
-```
+      describe('Свойства', () => {
+        // @TODO
+      });
+    });
 
 Мы сгруппируем тестовые сценарии в выражении `describe`, которые могут быть вложенными. Поэтому мы можем использовать эту стратегию для группировки тестов свойств и событий по отдельности.
 
 Затем мы создадим вспомогательную фабричную функцию для создания компонента сообщения, предоставим некоторые свойства
 
-```javascript
-const createCmp = propsData => mount(Message, { propsData });
-```
+{lang=javascript}
+    const createCmp = propsData => mount(Message, { propsData });
 
 ### Тестирование существование свойства
 
 Две очевидные вещи, которые мы можем протестировать — свойство существует или нет. Помните, что у компонента `Message.vue` есть свойство `message`, поэтому давайте утверждать, что оно в действительности получает это свойство. Vue Test Utils поставляется с функцией `props()`, используя её в сочетании c `toBe` мы можем проверить, что определённое свойство имеет заданное значение:
 
-```javascript
-it('есть свойство message', () => {
-  cmp = createCmp({ message: 'hey' });
-  expect(cmp.props().message).toBe('hey');
-})
-```
+{lang=javascript}
+    it('есть свойство message', () => {
+      cmp = createCmp({ message: 'hey' });
+      expect(cmp.props().message).toBe('hey');
+    });
 
 Свойства ведут таким образом, потому что что они будут получены, только если объявлены в компоненте. Это означает, что если мы передадим **свойство, которое не определено, оно не будет получено**. Поэтому, чтобы проверить отсутствие существования свойства, используйте несуществующее свойство:
 
-```javascript
-it('входной параметр `cat` не определён', () => {
-  cmp = createCmp({ cat: 'hey' });
-  expect(cmp.props().cat).toBeUndefined();
-})
-```
+{lang=javascript}
+    it('входной параметр `cat` не определён', () => {
+      cmp = createCmp({ cat: 'hey' });
+      expect(cmp.props().cat).toBeUndefined();
+    });
 
 Однако хотя в данном случае тест завершится удачно, не стоит забывать, что у Vue есть [обычные атрибуты](https://vuejs.org/v2/guide/components.html#Non-Prop-Attributes), которые устанавливаются как атрибуты корневого элемента в компоненте `Message`, поэтому можно проверить, что это поведение также работает, убедившись, что обычное свойство (не входной параметр) существует с помощью `attributes()`.
 
-```javascript
-it('обычное свойство `cat` существует', () => {
-  cmp = createCmp({ cat: 'hey' });
-  expect(cmp.attributes().cat).toBe('hey');
-})
-```
+{lang=javascript}
+    it('обычное свойство `cat` существует', () => {
+      cmp = createCmp({ cat: 'hey' });
+      expect(cmp.attributes().cat).toBe('hey');
+    });
 
 Мы также можем проверить **значение по умолчанию**. Перейдите в `Message.vue` и измените входные параметры следующим образом:
 
-```javascript
-props: {
-  message: String,
-  author: {
-    type: String,
-    default: 'Петя'
-  }
-},
-```
+{lang=javascript}
+    props: {
+      message: String,
+      author: {
+        type: String,
+        default: 'Петя'
+      }
+    },
 
 Тогда тест будет такой:
 
-```javascript
-it('Имя по умолчанию — Петя', () => {
-  cmp = createCmp({ message: 'hey' });
-  expect(cmp.props().author).toBe('Петя');
-})
-```
+{lang=javascript}
+    it('Имя по умолчанию — Петя', () => {
+      cmp = createCmp({ message: 'hey' });
+      expect(cmp.props().author).toBe('Петя');
+    })
 
 ### Утверждение проверки свойств
 
 У свойств могут быть заданы правила проверки, гарантирующие, что свойство обязательно или должно иметь определённый тип. Давайте расширим объявления свойства `message` следующим образом:
 
-```javascript
-props: {
-  message: {
-    type: String,
-    required: true,
-    validator: message => message.length > 1
-  }
-}
-```
+{lang=javascript}
+    props: {
+      message: {
+        type: String,
+        required: true,
+        validator: message => message.length > 1
+      }
+    }
 
 Идём дальше, вы можете использовать пользовательские типы конструкторов или настраиваемые правила проверки, как вы указано в [документации](https://vuejs.org/v2/guide/components.html#Prop-Validation). Не делайте этого прямо сейчас, я просто показываю это в качестве примера:
 
-```javascript
-class Message {}
-// ...
-props: {
-  message: {
-    type: Message, // Сравнение происходит с использованием `instance of`
+{lang=javascript}
+    class Message {}
     // ...
+    props: {
+      message: {
+        type: Message, // Сравнение происходит с использованием `instance of`
+        // ...
+        }
+      }
     }
-  }
-}
-```
 
 Всякий раз, когда правило проверки не выполняется, Vue показывает `console.error`. Например, для `createCmp({message: 1})` будет отображаться следующая ошибка:
 
-```
-[Vue warn]: Invalid prop: type check failed for prop "message". Expected String, got Number.
+E> [Vue warn]: Invalid prop: type check failed for prop "message". Expected String, got Number.
 (found in <Root>)
-```
 
 На текущий момент Vue Test Utils не имеет никакой утилиты для проверки подобного. Мы могли бы использовать `jest.spyOn` для тестирования ошибки:
 
-```javascript
-it('message is of type string', () => {
-  let spy = jest.spyOn(console, 'error');
-  cmp = createCmp({ message: 1 });
-  expect(spy).toBeCalledWith(expect.stringContaining('[Vue warn]: Invalid prop'));
+{lang=javascript}
+    it('message is of type string', () => {
+      let spy = jest.spyOn(console, 'error');
+      cmp = createCmp({ message: 1 });
+      expect(spy).toBeCalledWith(expect.stringContaining('[Vue warn]: Invalid prop'));
 
-  spy.mockReset(); // Или mockRestore(), чтобы полностью удалить mock-объект
-})
-```
+      spy.mockReset(); // Или mockRestore(), чтобы полностью удалить mock-объект
+    });
 
 Здесь мы следим за функцией `console.error` и проверяем, что оно отображает сообщение, содержащее заданную строку. Это не идеальный способ проверки, поскольку мы следим за глобальными объектами и полагаемся на побочные эффекты.
 
 К счастью, есть более простой способ сделать это, проверяя `vm.$options`. В этом свойстве Vue хранит параметры компонента в «расширенном виде». Под этим я имею в виду, что вы можете определить свои свойства по-разному:
 
-```javascript
-props: ['message']
+{lang=javascript}
+    props: ['message']
 
-// Или так:
+    // Или так:
 
-props: {
-  message: String
-}
+    props: {
+      message: String
+    }
 
-// Или даже так:
+    // Или даже так:
 
-props: {
-  message: {
-    type: String
-  }
-}
-```
+    props: {
+      message: {
+        type: String
+      }
+    }
 
 Но как бы вы не определили свойства, все они окажутся в самой расширенной форме объекта (как и последняя). Поэтому, если мы проверим `cmp.vm.$options.props.message`, в первом нами рассматриваемом случае все они будут в формате `{type: X} `(хотя для первого примера из блока кода выше это будет `{ type: null }`, поскольку тип свойства не был задан).
 
 Теперь, зная про всё это, мы могли бы написать набор тестов, проверяющий, что свойство `message` имеет ожидаемые правила проверки:
 
-```javascript
-describe('Message.test.js', () => {
-  // ...
-  describe('Свойства', () => {
-    // ...
-    describe('Тестирование корректности проверки свойств', () => {
-      const message = createCmp().vm.$options.props.message;
+{lang=javascript}
+    describe('Message.test.js', () => {
+      // ...
+      describe('Свойства', () => {
+        // ...
+        describe('Тестирование корректности проверки свойств', () => {
+          const message = createCmp().vm.$options.props.message;
 
-      it('Входной параметр message имеет строковый тип', () => {
-        expect(message.type).toBe(String);
-      });
+          it('Входной параметр message имеет строковый тип', () => {
+            expect(message.type).toBe(String);
+          });
 
-      it('Входной параметр message является обязательным', () => {
-        expect(message.required).toBeTruthy();
-      });
+          it('Входной параметр message является обязательным', () => {
+            expect(message.required).toBeTruthy();
+          });
 
-      it('Входной параметр message имеет по крайней мере длину в два символа', () => {
-        expect(message.validator && message.validator('a')).toBeFalsy();
-        expect(message.validator && message.validator('aa')).toBeTruthy();
+          it('Входной параметр message имеет по крайней мере длину в два символа', () => {
+            expect(message.validator && message.validator('a')).toBeFalsy();
+            expect(message.validator && message.validator('aa')).toBeTruthy();
+          });
+        });
       });
-    });
-```
+    };
 
 ## Пользовательские события
 
@@ -192,121 +180,113 @@ describe('Message.test.js', () => {
 
 Сначала перейдите в `Message.vue` и используйте `$emit` для генерирования упомянутого пользовательского события:
 
-```html
-<template>
-  <li
-    style="margin-top: 10px"
-    class="message"
-    @click="handleClick">
-      {{message}}
-  </li>
-</template>
+{lang=html}
+    <template>
+      <li
+        style="margin-top: 10px"
+        class="message"
+        @click="handleClick">
+          {{message}}
+      </li>
+    </template>
 
-<script>
-export default {
-  name: 'Message',
-  props: ['message'],
-  methods: {
-    handleClick() {
-      this.$emit('message-clicked', this.message)
-    }
-  }
-};
-</script>
-```
+    <script>
+    export default {
+      name: 'Message',
+      props: ['message'],
+      methods: {
+        handleClick() {
+          this.$emit('message-clicked', this.message)
+        }
+      }
+    };
+    </script>
 
 А в компоненте `MessageList.vue` обрабатывает это событие `@message-clicked`:
 
-```html
-<template>
-  <ul>
-    <Message
-      @message-clicked="handleMessageClick"
-      :message="message"
-      v-for="message in messages"
-      :key="message"/>
-  </ul>
-</template>
+{lang=html}
+    <template>
+      <ul>
+        <Message
+          @message-clicked="handleMessageClick"
+          :message="message"
+          v-for="message in messages"
+          :key="message"/>
+      </ul>
+    </template>
 
-<script>
-import Message from './Message'
+    <script>
+    import Message from './Message'
 
-export default {
-  name: 'MessageList',
-  props: ['messages'],
-  methods: {
-    handleMessageClick(message) {
-      console.log(message)
-    }
-  },
-  components: {
-    Message
-  }
-};
-</script>
-```
+    export default {
+      name: 'MessageList',
+      props: ['messages'],
+      methods: {
+        handleMessageClick(message) {
+          console.log(message)
+        }
+      },
+      components: {
+        Message
+      }
+    };
+    </script>
 
 Теперь пришло время написать модульный тест. Создайте вложенный `describe` в файле `test/Message.spec.js` и подготовьте заглушку для тестового сценария _"Проверить, что компоненты `Message` запускают событие `message-clicked` при нажатии на сообщение"_, про которое было написано ранее:
 
-```javascript
-//...
-describe('Message.test.js', () => {
-  // ...
-  describe('События', () => {
-    beforeEach(() => {
-      cmp = createCmp({ message: 'Cat' });
-    });
+{lang=javascript}
+    //...
+    describe('Message.test.js', () => {
+      // ...
+      describe('События', () => {
+        beforeEach(() => {
+          cmp = createCmp({ message: 'Cat' });
+        });
 
-    it('вызывается handleClick после клика на сообщение', () => {
-      // @TODO
-    });
-  })
-})
-```
+        it('вызывается handleClick после клика на сообщение', () => {
+          // @TODO
+        });
+      })
+    })
 
 ### Тестирование события клика вызывает метод-обработчик
 
 Первое, что мы можем проверить, это то, что при нажатии сообщения вызывается функция `handleClick`. Для этого мы можем использовать  `trigger` компонента-обёртки и шпион из Jest, используя функцию `spyOn`:
 
-The first thing we can test is that when clicking a message, the `handleClick` function gets called. For that we can use a `trigger` of the wrapper component, and a jest spy using `spyOn` function:
+{lang=javascript}
+    it('вызывается handleClick после клика на сообщение', () => {
+      const spy = spyOn(cmp.vm, 'handleClick');
+      // cmp.update() // Не требуется с vue-test-utils версии 1.0.0-beta.12
 
-```javascript
-it('вызывается handleClick после клика на сообщение', () => {
-  const spy = spyOn(cmp.vm, 'handleClick');
-  // cmp.update() // Не требуется с vue-test-utils версии 1.0.0-beta.12
-
-  const el = cmp.find('.message').trigger('click');
-  expect(cmp.vm.handleClick).toBeCalled();
-})
-```
+      const el = cmp.find('.message').trigger('click');
+      expect(cmp.vm.handleClick).toBeCalled();
+    });
 
 W> Внимание: ранее при изменениях в шаблоне требовался вызов `cmp.update()`, в новых версиях этот метод удалён, поскольку все обновления по умолчанию синхронные, поэтому при его использовании, вы получите следующую ошибку:
 W> `[vue-test-utils]: update has been removed from vue-test-utils. All updates are now synchronous by default`
 
 Имейте в виду, что с помощью шпиона будет вызываться изначальный метод `handleClick`. Возможно, вы действительно этого хотите, но, как правило, мы хотим избежать подобного при тестировании, а вместо этого просто хотим проверить, что при клике на самом деле вызываются определённые методы. Для этого мы можем использовать функцию-имитацию, предоставляемую Jest:
 
-```javascript
-it('вызывается handleClick при клике на сообщение', () => {
-  cmp.vm.handleClick = jest.fn();
+{lang=javascript}
+    it('вызывается handleClick при клике на сообщение', () => {
+      cmp.vm.handleClick = jest.fn();
 
-  const el = cmp.find('.message').trigger('click');
-  expect(cmp.vm.handleClick).toBeCalled();
-})
-```
+      const el = cmp.find('.message').trigger('click');
+      expect(cmp.vm.handleClick).toBeCalled();
+    })
 
 Здесь мы полностью заменяем метод `handleClick`, доступный в `vm` компонента-оболочки, возвращаемого функцией `mount`.
 
 Однако выше написанный тест завершится неудачей, поскольку мы не указали, что хотим использовать функцию-имитацию, а не оригинальный метод-обработчик. Для исправления этого воспользуемся вспомогательным методом `setMethods` из официального инструментария:
 
-```javascript
-it('вызывается handleClick при клике на сообщение', () => {
-  const stub = jest.fn();
-  cmp.setMethods({ handleClick: stub });
+{lang=javascript}
+    it('вызывается handleClick при клике на сообщение', () => {
+      const stub = jest.fn();
+      cmp.setMethods({ handleClick: stub });
 
-  const el = cmp.find('.message').trigger('click');
-  expect(stub).toBeCalled();
-})
-```
+      const el = cmp.find('.message').trigger('click');
+      expect(stub).toBeCalled();
+    })
 
 Использование **`setMethods` — это предлагаемый способ** для проверки вызова обработчика при наступлении события, поскольку это абстракция, который официальный инструмент предоставляет нам для случаев, когда изменяются внутренности Vue.
 
@@ -314,15 +294,14 @@ it('вызывается handleClick при клике на сообщение',
 
 Мы протестировали, что метод клика вызывает обработчик, но мы не тестировали, что обработчик сам генерирует событие `message-clicked`. Мы можем напрямую вызвать метод `handleClick` и использовать функцию-имитации из Jest в сочетании с методом экземпляра Vue `$on`:
 
-```javascript
-it('запускает событие message-clicked при вызове метода handleClick', () => {
-  const stub = jest.fn();
-  cmp.vm.$on('message-clicked', stub);
-  cmp.vm.handleClick();
+{lang=javascript}
+    it('запускает событие message-clicked при вызове метода handleClick', () => {
+      const stub = jest.fn();
+      cmp.vm.$on('message-clicked', stub);
+      cmp.vm.handleClick();
 
-  expect(stub).toBeCalledWith('Cat');
-})
-```
+      expect(stub).toBeCalledWith('Cat');
+    })
 
 Смотрите, что здесь мы используем `toBeCalledWith`, поэтому мы можем точно проверить, какие параметры мы ожидаем, делая тест ещё более надёжным.
 
@@ -332,29 +311,27 @@ it('запускает событие message-clicked при вызове мет
 
 Поэтому добавьте следующий тест к `MessageList.test.js`:
 
-```javascript
-it('вызывается handleMessageClick при срабатывании @message-click', () => {
-    const stub = jest.fn();
-    cmp.setMethods({ handleMessageClick: stub });
-    const el = cmp.find('.message').vm.$emit('message-clicked', 'Cat');
+{lang=javascript}
+    it('вызывается handleMessageClick при срабатывании @message-click', () => {
+      const stub = jest.fn();
+      cmp.setMethods({ handleMessageClick: stub });
+      const el = cmp.find('.message').vm.$emit('message-clicked', 'Cat');
 
-    expect(stub).toBeCalledWith('Cat');
-})
-```
+      expect(stub).toBeCalledWith('Cat');
+    })
 
 Однако мы можем написать тот же самый тест, т.е. проверить вызов `handleMessageClick`, который находится в дочернем компоненте, из файла для тестов к родительскому компоненту `Message`.
 
 Для этого воспользуемся методом `emitted()`, который возвращает массив вызовов событий, поэтому так как в тесте мы генерируем только один вызов события `message-clicked`, то обращаемся в элементу массива с нулевым индексом, а далее проверяем, что было передано в момент порождения события. Можете этого не добавлять, просто знайте, что есть такая возможность. 
 
-```javascript
-it('вызывается handleMessageClick при срабатывании @message-click', () => {
-    // Файл `Message.test.js`:
-  
-    const el = cmp.find('.message').vm.$emit('message-clicked', 'Cat');
+{lang=javascript}
+    it('вызывается handleMessageClick при срабатывании @message-click', () => {
+        // Файл `Message.test.js`:
+      
+        const el = cmp.find('.message').vm.$emit('message-clicked', 'Cat');
 
-    expect(cmp.emitted()['message-clicked'][0]).toEqual(['Cat']);
-});
-```
+        expect(cmp.emitted()['message-clicked'][0]).toEqual(['Cat']);
+    });
 
 ## Резюме
 

@@ -14,84 +14,78 @@
 
 Поэтому мы можем сделать что-то подобное:
 
-```javascript
-  const messageListCmp = mount(MessageList);
-  
-  expect(messageListCmp.find('.message').element).toBeInstanceOf(HTMLElement);
+{lang=javascript}
+    const messageListCmp = mount(MessageList);
 
-  // Или даже вызывать его несколько раз
-  let el = messageListCmp.find('.message').find('span').element;
+    expect(messageListCmp.find('.message').element).toBeInstanceOf(HTMLElement);
 
-  // Хотя предыдущий пример мы могли сделать это короче
-  let el = messageListCmp.find('.message span').element;
-```
+    // Или даже вызывать его несколько раз
+    let el = messageListCmp.find('.message').find('span').element;
+
+    // Хотя предыдущий пример мы могли сделать это короче
+    let el = messageListCmp.find('.message span').element;
 
 ### Утверждение структуры и стиля
 
 Давайте добавим больше тестов для `MessageList.test.js`:
 
-```javascript
-it('это компонент MessageList', () => {
-  expect(messageListCmp.is(MessageList)).toBe(true);
+{lang=javascript}
+    it('это компонент MessageList', () => {
+      expect(messageListCmp.is(MessageList)).toBe(true);
 
-  // Или с помощью CSS-селектора
-  expect(messageListCmp.is('ul')).toBe(true);
-})
+      // Или с помощью CSS-селектора
+      expect(messageListCmp.is('ul')).toBe(true);
+    });
 
-it('содержит компонент Message', () => {
-  expect(cmp.contains(Message)).toBe(true);
+    it('содержит компонент Message', () => {
+      expect(cmp.contains(Message)).toBe(true);
 
-  // Или с помощью CSS-селектора
-  expect(cmp.contains('.message')).toBe(true);
-})
-```
+      // Или с помощью CSS-селектора
+      expect(cmp.contains('.message')).toBe(true);
+    });
 
 Здесь мы используем `is` для утверждения типа корневого компонента и `contains` для проверки существования дочерних компонентов. Так же, как и `find`, они получают объект типа Selector, который может быть CSS-селектором (тип Selector) или компонентом (тип Component).
 
 У нас есть некоторые утилиты для утверждения **экземпляра Vue**:
 
-```javascript
-it('Компоненты MessageList и Message являются экземплярами Vue', () => {
-  expect(cmp.isVueInstance()).toBe(true);
-  expect(cmp.find(Message).isVueInstance()).toBe(true);
-})
-```
+{lang=javascript}
+    it('Компоненты MessageList и Message являются экземплярами Vue', () => {
+      expect(cmp.isVueInstance()).toBe(true);
+      expect(cmp.find(Message).isVueInstance()).toBe(true);
+    });
 
 Теперь мы собираемся проверить **структуру** компонента более подробно:
 
-```javascript
-it('Существует элемент Message', () => {
-  expect(cmp.find('.message').exists()).toBe(true);
-})
+{lang=javascript}
+    it('Существует элемент Message', () => {
+      expect(cmp.find('.message').exists()).toBe(true);
+    });
 
-it('Message не пустой', () => {
-  expect(cmp.find(Message).isEmpty()).toBe(false);
-})
+    it('Message не пустой', () => {
+      expect(cmp.find(Message).isEmpty()).toBe(false);
+    });
 
-it('У Message есть атрибут класса со значением "message"', () => {
-  expect(cmp.attributes().class).toBe('message');
-})
-```
+    it('У Message есть атрибут класса со значением "message"', () => {
+      expect(cmp.attributes().class).toBe('message');
+    });
 
 Методы `exists`, `isEmpty` очень удобные на практике.
 
 Теперь у нас есть `classes()` и `attributes().style` для проверки **стилей**. Давайте обновим компонент `Message.vue` со стилем, поскольку `attributes().style` проверяет только встроенные стили:
 
-```html
-<li style="margin-top: 10px" class="message">{{message}}</li>
-```
+{lang=html}
+    <li style="margin-top: 10px" class="message">{{message}}</li>
 
 Вот тесты для этого:
 
-```javascript
-it('У компонента Message задан класс .message', () => {
-  expect(cmp.find(Message).classes()).toContain('message');
-})
+{lang=javascript}
+    it('У компонента Message задан класс .message', () => {
+      expect(cmp.find(Message).classes()).toContain('message');
+    });
 
-it('У компонента Message определён стиль `padding-top: 10`', () => {
-  expect(cmp.find(Message).attributes().style).toBe('margin-top: 10px;');
-})
-```
+    it('У компонента Message определён стиль `padding-top: 10`', () => {
+      expect(cmp.find(Message).attributes().style).toBe('margin-top: 10px;');
+    });
 
 ## Резюме
 
