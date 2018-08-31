@@ -40,7 +40,7 @@ npm i -D jest jest-vue-preprocessor babel-jest
 **Обновление (10.10.2017)**: он может быть установлен уже из npm, так как версия `beta.1` была опубликована.
 
 I> ## На заметку
-I> [Vue Test Utils](https://github.com/vuejs/vue-test-utils) предоставляет набор утилит для утверждений (проведения проверок) на компонентах Vue.js.
+I> [Vue Test Utils](https://github.com/vuejs/vue-test-utils) предоставляет набор утилит для утверждений (выполнения проверок) на компонентах Vue.js. В книге мы используем последнюю на момент написания версию этого инструмента — `1.0.0-beta.24`.
 
 ```bash
 npm i -D vue-test-utils
@@ -73,10 +73,8 @@ npm i -D vue-test-utils
 ```json
 {
   "scripts": {
-    "test": "jest",
-    ...
-  },
-  ...
+    "test": "jest"
+  }
 }
 ```
 
@@ -99,7 +97,7 @@ npm i -D vue-test-utils
 export default {
   name: 'list',
   props: ['messages']
-}
+};
 </script>
 ```
 
@@ -121,15 +119,15 @@ export default {
   components: {
     MessageList
   }
-}
+};
 </script>
 ```
 
 У нас уже есть пара компонентов, которые мы можем протестировать. Давайте создадим каталог `test` в корне проекта и файл `App.test.js`:
 
 ```javascript
-import Vue from 'vue'
-import App from '../src/App'
+import Vue from 'vue';
+import App from '../src/App';
 
 describe('App.test.js', () => {
   let cmp, vm;
@@ -144,7 +142,7 @@ describe('App.test.js', () => {
   })
 
   it('сообщения идентичны ["Cat"]', () => {
-    expect(vm.messages).toEqual(['Cat'])
+    expect(vm.messages).toEqual(['Cat']);
   });
 })
 ```
@@ -164,7 +162,7 @@ npm t -- --watch
 
 ```javascript
 it('имеет ожидаемую структуру HTML', () => {
-  expect(vm.$el).toMatchSnapshot()
+  expect(vm.$el).toMatchSnapshot();
 });
 ```
 
@@ -204,8 +202,8 @@ exports[`App.test.js имеет ожидаемую структуру HTML 1`] =
 Vue Test Utils предоставим нам поверхностную отрисовку среди прочего функционала. Мы могли бы переписать предыдущий тест следующим образом:
 
 ```javascript
-import { shallowMount } from '@vue/test-utils'
-import App from '../src/App'
+import { shallowMount } from '@vue/test-utils';
+import App from '../src/App';
 
 describe('App.test.js', () => {
   let cmp;
@@ -220,11 +218,11 @@ describe('App.test.js', () => {
 
   it('сообщения идентичны ["Cat"]', () => {
     // Внутри cmp.vm, мы имеем доступ ко всем методам экземпляра Vue
-    expect(cmp.vm.messages).toEqual(['Cat'])
+    expect(cmp.vm.messages).toEqual(['Cat']);
   });
 
   it('имеет ожидаемую структуру HTML', () => {
-    expect(cmp.element).toMatchSnapshot()
+    expect(cmp.element).toMatchSnapshot();
   });
 });
 ```
@@ -254,7 +252,7 @@ import { mount } from '@vue/test-utils'
 import MessageList from '../src/components/MessageList'
 
 describe('MessageList.test.js', () => {
-  let cmp
+  let cmp;
 
   beforeEach(() => {
     cmp = mount(MessageList, {
@@ -266,11 +264,11 @@ describe('MessageList.test.js', () => {
   });
 
   it('получен массив ["Cat"] во входном параметре сообщения', () => {
-    expect(cmp.vm.messages).toEqual(['Cat'])
+    expect(cmp.vm.messages).toEqual(['Cat']);
   });
 
   it('имеет ожидаемую структуру HTML', () => {
-    expect(cmp.element).toMatchSnapshot()
+    expect(cmp.element).toMatchSnapshot();
   });
 })
 ```

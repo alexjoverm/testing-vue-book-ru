@@ -16,7 +16,7 @@
 
 ```javascript
 describe('Message.test.js', () => {
-  let cmp
+  let cmp;
 
   describe('Свойства', () => {
     // @TODO
@@ -164,16 +164,16 @@ describe('Message.test.js', () => {
       const message = createCmp().vm.$options.props.message;
 
       it('Входной параметр message имеет строковый тип', () => {
-        expect(message.type).toBe(String)
+        expect(message.type).toBe(String);
       });
 
       it('Входной параметр message является обязательным', () => {
-        expect(message.required).toBeTruthy()
+        expect(message.required).toBeTruthy();
       });
 
       it('Входной параметр message имеет по крайней мере длину в два символа', () => {
-        expect(message.validator && message.validator('a')).toBeFalsy()
-        expect(message.validator && message.validator('aa')).toBeTruthy()
+        expect(message.validator && message.validator('a')).toBeFalsy();
+        expect(message.validator && message.validator('aa')).toBeTruthy();
       });
     });
 ```
@@ -255,11 +255,11 @@ describe('Message.test.js', () => {
   describe('События', () => {
     beforeEach(() => {
       cmp = createCmp({ message: 'Cat' });
-    })
+    });
 
     it('вызывается handleClick после клика на сообщение', () => {
       // @TODO
-    })
+    });
   })
 })
 ```
@@ -353,7 +353,7 @@ it('вызывается handleMessageClick при срабатывании @mes
     const el = cmp.find('.message').vm.$emit('message-clicked', 'Cat');
 
     expect(cmp.emitted()['message-clicked'][0]).toEqual(['Cat']);
-})
+});
 ```
 
 ## Резюме
