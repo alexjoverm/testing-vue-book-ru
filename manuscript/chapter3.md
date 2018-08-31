@@ -95,6 +95,6 @@ it('У компонента Message определён стиль `padding-top: 
 
 ## Резюме
 
-Для упрощения тестирования компонентов Vue существует куча утилит. Вы можете найти их все в [файле типизации] (https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts).
+Для упрощения тестирования компонентов Vue существует куча утилит. Вы можете найти их все в [файле типизации](https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts).
 
 Вы можете найти рабочий код этой главы в [этом репозитории](https://github.com/alexjoverm/vue-testing-series/blob/Test-Styles-and-Structure-in-Vue-js-and-Jest/test/MessageList.test.js).
