@@ -158,7 +158,7 @@ E> [Vue warn]: Invalid prop: type check failed for prop "message". Expected Stri
             expect(message.required).toBeTruthy();
           });
 
-          it('Входной параметр message имеет по крайней мере длину в два символа', () => {
+          it('Входной параметр message имеет не менее двух символов', () => {
             expect(message.validator && message.validator('a')).toBeFalsy();
             expect(message.validator && message.validator('aa')).toBeTruthy();
           });
