@@ -1,5 +1,7 @@
 {frontmatter}
 
+preface.md
+
 {mainmatter}
 
 intro.md
