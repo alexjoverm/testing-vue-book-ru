@@ -20,14 +20,14 @@
 
 Начнём с создания нового проекта с использованием [`vue-cli`](https://github.com/vuejs/vue-cli), отвечая NO на все вопросы с вариантом yes или no:
 
-{lang=bash}
+{lang=bash, linenos=off}
     npm install -g vue-cli
     vue init webpack vue-test
     cd vue-test
 
 Затем нам нужно будет установить кое-какие зависимости:
 
-{lang=bash}
+{lang=bash, linenos=off}
     # Установка зависимостей
     npm i -D jest jest-vue-preprocessor babel-jest
 
@@ -40,7 +40,7 @@
 I> ## На заметку
 I> [Vue Test Utils](https://github.com/vuejs/vue-test-utils) предоставляет набор утилит для утверждений (выполнения проверок) на компонентах Vue.js. В книге мы используем последнюю на момент написания версию этого инструмента — `1.0.0-beta.24`.
 
-{lang=bash}
+{lang=bash, linenos=off}
     npm i -D vue-test-utils
 
 Давайте добавим следующую конфигурацию для Jest в `package.json`:
@@ -141,7 +141,7 @@ I> Обычно сообщения в функции `it` пишутся на а
 
 В данный момент, если мы выполним `npm test` (или `npm t` как сокращённая версия этой команды), тест должен запуститься и успешно пройти. Поскольку мы изменяем тесты, давайте лучше запустим их **в режиме просмотра (watch mode)**:
 
-{lang=bash}
+{lang=bash, linenos=off}
     npm t -- --watch
 
 ### Проблема с вложенными компонентами
