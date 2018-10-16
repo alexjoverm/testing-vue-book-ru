@@ -127,6 +127,8 @@ That's it, depending on the computed property it may need more test cases.
 
 ## Watchers
 
+<!-- TODO: correct -->
+
 Honestly, I haven't come across any case where I really need to use watchers that I computed properties couldn't solve. I've seen them misused as well, leading to a very unclear data workflow among components and messing everything up, so don't rush on using them and think beforehand.
 
 As you can see in the [Vue.js docs](https://vuejs.org/v2/guide/computed.html#Watchers), watchers are often used to react to data changes and perform asynchronous operations, such can be performing an ajax request.

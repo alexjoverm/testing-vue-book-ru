@@ -52,7 +52,7 @@ it('has no cat property', () => {
 })
 ```
 
-However, in this case that test will fail because Vue has [non-props attributes](https://vuejs.org/v2/guide/components.html#Non-Prop-Attributes) which sets it to the root of the `Message` component, thus being recognized as a prop and then the test will return `true`. Changing it to `toBeTruty` will make it pass for this example:
+However, in this case that test will fail because Vue has [non-props attributes](https://vuejs.org/v2/guide/components.html#Non-Prop-Attributes) which sets it to the root of the `Message` component, thus being recognized as a prop and then the test will return `true`. Changing it to `toBeTruthy` will make it pass for this example:
 
 ```javascript
 it('has no cat property', () => {
@@ -96,7 +96,7 @@ props: {
 }
 ```
 
-Going further, you could use custom constructors types or custom validation rules, as you can see in [the docs](https://vuejs.org/v2/guide/components.html#Prop-Validation). Don't do this right now, I'm just showing it as an example:
+Going further, you could use custom constructor types or custom validation rules, as you can see in [the docs](https://vuejs.org/v2/guide/components.html#Prop-Validation). Don't do this right now, I'm just showing it as an example:
 
 ```javascript
 class Message {}
