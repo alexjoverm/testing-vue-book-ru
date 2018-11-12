@@ -12,10 +12,10 @@ Cuando estamos testeando _props_, testeamos cómo se comporta un componente cuan
 
 > Para pasarlas, usaremos `propsData`, en vez de `props`. Éste último es para definir propiedades en el componente, no para pasarlas.
 
-Crearemos un archivo `mensaje.test.js` y añadiremos lo siguiente:
+Crearemos un archivo `Mensaje.test.js` y añadiremos lo siguiente:
 
 ```javascript
- describe('mensaje.test.js', () => {
+ describe('Mensaje.test.js', () => {
   let cmp
 
   describe('Propiedades', () => {
@@ -39,7 +39,7 @@ Lo primero sería testear si una propiedad existe o no. Recordemos que el compon
 ```javascript
 it('Tiene la propiedad `mensaje`', () => {
   cmp = createCmp({ mensaje: 'Hola' })
-  expect(cmp.hasProp('mensaje', 'Hola')).toBeTruthy()
+  expect(cmp.props().message).toBe('Hola')
 })
 ```
 
@@ -50,16 +50,18 @@ Las propiedades se comportan de manera que se recibirán sólo si han sido decla
 ```javascript
 it('No tiene una propiedad llamada "gato"', () => {
   cmp = createCmp({ gato: 'Hola' })
-  expect(cmp.hasProp('gato', 'Hola')).toBeFalsy()
+  expect(cmp.props().gato).toBeUndefined()
 })
 ```
 
-Sin embargo, este test fallará porque Vue tiene (atributos sin propiedades) [non-props attributes](https://vuejs.org/v2/guide/components.html#Non-Prop-Attributes) que la setea en la raíz del componente `mensaje`, con lo que será recomocida como una `prop` y el test devolverá `true`. Si lo cambiamos a `toBeTruty` haremos que el test pase:
+Sin embargo, aunque este test pasará, no olvidemos de que Vue tiene (atributos sin propiedades) [non-props attributes](https://vuejs.org/v2/guide/components.html#Non-Prop-Attributes) que la setea en la raíz del componente `mensaje`, así que podemos comprobar que la el atributo _non-prop_ existe usando `attributes()`:
+
+<!-- TODO: pedir revisar -->
 
 ```javascript
-it('No tiene una propiedad llamada "gato"', () => {
+it('Tiene un atributo non-prop llamado "gato"', () => {
   cmp = createCmp({ gato: 'Hola' });
-  expect(cmp.hasProp('gato', 'Hola')).toBeTruthy()
+  expect(cmp.attributes().gato).toBe('Hola')
 })
 ```
 
@@ -80,7 +82,7 @@ El test podría ser:
 ```javascript
 it('Paco es el autor por defecto', () => {
   cmp = createCmp({ mensaje: 'hey' })
-  expect(cmp.hasProp('autor', 'Paco')).toBeTruthy()
+  expect(cmp.props().author).toBe('Paco')
 })
 ```
 
@@ -119,7 +121,7 @@ Cuando unavalidación no se cumple, Vue mostrará un `console.error`. Por ejempl
 (found in <Root>)
 ```
 
-<!-- TODO update: -->
+<!-- TODO check: -->
 
 En el momento de escribir este artículo, `vue-test-utils` no viene con una utilidad para testea esto. Pero podemos usar `jest.spyOn`:
 
@@ -160,7 +162,7 @@ Al finál, aparecerán de la forma más extendida (como el último ejemplo). As�
 Con ello en mente, podemos escribir una _test suite_ para testear que la propiedad `mensaje` tiene las reglas de validación esperadas:
 
 ```javascript
-describe('mensaje.test.js', () => {
+describe('Mensaje.test.js', () => {
   ...
   describe('Propiedades', () => {
     ...
@@ -192,7 +194,7 @@ Podemos testear dos cosas en los Eventos Custom:
 En el caso de los ejemplos `mensajeList.vue` y `mensaje.vue`, se traduce en:
 
  - Afirmar que el componente `mensaje` dispara un `mensaje-clickado` cuando el mensaje se clicka.
- - Checkear en `mensajeList` que `mensaje-clickado` se produce y el _callback_ `handleMessageClick` es llamado
+ - Checkear en `mensajeList` que `mensaje-clickado` se produce y el _callback_ `gestionarMensajeClick` es llamado
 
 Vamos a ello, en `mensaje.vue` usaremos `$emit`para disparar nuestro evento:
 
@@ -226,7 +228,7 @@ Y en `mensajeList.vue`, recibiremos el evento en `@mensaje-clickado`:
 <template>
     <ul>
         <mensaje-item
-          @mensaje-clickado="handleMessageClick"
+          @mensaje-clickado="gestionarMensajeClick"
           :mensaje="mensaje"
           v-for="(mensaje, index) in mensajes"
           :key="index"></mensaje-item>
@@ -240,7 +242,7 @@ export default {
   name: 'mensajeList',
   props: ['mensajes'],
   methods: {
-    handleMessageClick(mensaje) {
+    gestionarMensajeClick(mensaje) {
       console.log(mensaje)
     }
   },
@@ -251,11 +253,11 @@ export default {
 </script>
 ```
 
-Ahora vamos a escribir nuestro test unitario. Creamos un bloque `describe` anidado en `test/Message.spec.js` y preparamos el esqueleto de el _test case_ _"Afirmar que los componentes`mensaje` disparan un `mensaje-clickado` cuando un `mensaje-item` es clickado"_ que habíamos mencionado:
+Ahora vamos a escribir nuestro test unitario. Creamos un bloque `describe` anidado en `test/Mensaje.spec.js` y preparamos el esqueleto de el _test case_ _"Afirmar que los componentes`mensaje` disparan un `mensaje-clickado` cuando un `mensaje-item` es clickado"_ que habíamos mencionado:
 
 ```javascript
 ...
-describe('mensaje.test.js', () => {
+describe('Mensaje.test.js', () => {
   ...
   describe('Eventos', () => {
     beforeEach(() => {
@@ -278,21 +280,17 @@ Lo primero que podemos testear es que al clickar en un mensaje, la función `enC
 ```javascript
 it('llama a enClick cuando se clicka un mensaje', () => {
   const spy = spyOn(cmp.vm, 'enClick')
-  cmp.update() // fuerza la re-renderización, aplicando cambios en la plantilla
 
   const el = cmp.find('.mensaje').trigger('click')
   expect(cmp.vm.enClick).toBeCalled()
 })
 ```
 
->Daros cuenta del `cmp.update()`. cuando cambiamos algo en la plantilla como `enClick` en este casp, y queremos que la plantilla pille los cambios, necesitamos usar la función `update`.
-
 Otra cosa a tener en cuenta es que hemos utilziado la misma función `enClick`. Lo aconsejable sería _mockearla_ para sólo testear que el asociado al _click_ se ha llamado. Para ello usaremos la función Mock de Jest (`jest.fn()`, que es una función que nosotr@s controlamos):
 
 ```javascript
 it('llama a enClick cuando se clicka un mensaje', () => {
   cmp.vm.enClick = jest.fn()
-  cmp.update()
 
   const el = cmp.find('.mensaje').trigger('click')
   expect(cmp.vm.enClick).toBeCalled()
@@ -301,7 +299,7 @@ it('llama a enClick cuando se clicka un mensaje', () => {
 
 De dicha manera, sustituimos el método `enClick` completamente, al cual hemos accedido desde el _wrapper component_ que devuelve la funcion _mount()_.
 
-Podemos simplificarlo aún más con el _helper_ `setMethods` que las herramientas oficiales nos preveen:
+Sin embargo, el test fallará poque no hemos indicado que queremos usar la función Mock de Jest y no el método original. Para solucionarlo, usaremos el método `setMethods` que nos da la herramienta oficial de Vue:
 
 ```javascript
 it('llama a enClick cuando se clicka un mensaje', () => {
@@ -329,24 +327,22 @@ it('emite un evento "mensaje-clickado" cuando el método enClick se invoca', () 
 })
 ```
 
-Estamos usando el `toBeCalledWith` para afirmar los parámetros que se le están pasando, haciendo el test todavía más robusto. Esta vez no necesitamos `cmp.update()`, ya que no hay cambios en la plantilla que necesitaran ser propagados.
+Estamos usando el `toBeCalledWith` para afirmar los parámetros que se le están pasando, haciendo el test todavía más robusto.
 
 ### Testeando que el @mensaje-clickado dispara un evento
 
 Para eventos _custom_, no usamos el método `trigger`, ya que es sólo para eventos propios del DOM. Pero podemos emitirlo nosotr@s mism@s, utilizando el `vm.$emit` del componente Mensaje. Añadiremos lo siguiente en `mensajeList.test.js`:
 
 ```javascript
-it('Llama a handleMessageClick cuando @mensaje-click se produce', () => {
+it('Llama a gestionarMensajeClick cuando @mensaje-click se produce', () => {
   const stub = jest.fn()
-  cmp.setMethods({ handleMessageClick: stub })
+cmp.setMethods({ gestionarMensajeClick: stub })
   cmp.update()
 
   const el = cmp.find(mensaje).vm.$emit('mensaje-clickado', 'gato')
   expect(stub).toBeCalledWith('gato')
 })
 ```
-
-<!-- TODO: update `handleMessageClicked` ?? -->
 
 ## Resumiendo
 

@@ -87,17 +87,17 @@ export default {
 
 Mostrará un `input`, junto con un reflejo de la cadena que introduzcamos. Es un ejemplo simplón pero suficiente para que nosotr@s lo testeemos.
 
-Ahora lo añadimos a nuestro árbol de componentes en `App.vue`, lo pondremos después del componente `MessageList`. Y hay que acordarse de importarlo e incluirlo en  la propiedad `components` de nuestra isntancia. Luego, creamos un `test/Form.test.js` con el esqueleto habitual:
+Ahora lo añadimos a nuestro árbol de componentes en `App.vue`, lo pondremos después del componente `ListaMensajes`. Y hay que acordarse de importarlo e incluirlo en  la propiedad `components` de nuestra isntancia. Luego, creamos un `test/Form.test.js` con el esqueleto habitual:
 
 ```javascript
-import { shallow } from 'vue-test-utils'
+import { shallowMount } from 'vue-test-utils'
 import Form from '../src/components/Form'
 
 describe('Form.test.js', () => {
   let cmp
 
   beforeEach(() => {
-    cmp = shallow(Form)
+    cmp = shallowMount(Form)
   })
 })
 ```
@@ -107,12 +107,12 @@ Y ahora crearemos nuestra _test suite_ con dos _test cases_:
 ```javascript
 describe('Propiedades', () => {
   it('devuelve la cadena que le pasemos si la propiedad `reversed` no es `true`', () => {
-    cmp.vm.inputValue = 'Women in tech'
+    cmp.setData({ inputValue: 'Women in tech' })
     expect(cmp.vm.reversedInput).toBe('Women in tech')
   })
 
   it('devuelve la cadena invertida si la propiedad `reversed` es `true`', () => {
-    cmp.vm.inputValue = 'Women in tech'
+    cmp.setData({ inputValue: 'Women in tech' })
     cmp.setProps({ reversed: true })
     expect(cmp.vm.reversedInput).toBe('hcet ni nemoW')
   })
@@ -138,7 +138,7 @@ Vamos a suponer que queremos realizar un cambio cuando el `inputValue` de nuestr
 ```javascript
 watch: {
   inputValue(newVal, oldVal) {
-    if(newVal.trim().length && newVal !== oldVal) {
+    if (newVal.trim().length && newVal !== oldVal) {
       console.log(newVal)
     }
   }
@@ -190,45 +190,39 @@ it('se llama con un nuevo valor en el resto de casos', () => {
 })
 ```
 
-Al cambiar el `inputValue`, el espía del `console.log` debería llamrse, ¿verdad? ¡Pues no! ¿¿¿_WTF_??? Pero hay una explciación: al contrario de las _computed properties_, los _watchers_ son **aplazados al siguiente ciclo de actualización** que Vue usa para ver los cambios. Así que, básicamente, `console.log` sí se está llamando, pero para el momento en el que nuestros tests ya se han ejecutado.
+Al cambiar el `inputValue`, el espía del `console.log` debería llamrse, ¿verdad? Bueno..., pues no. Pero hay una explciación: al contrario de las _computed properties_, los _watchers_ son **aplazados al siguiente ciclo de actualización** que Vue usa para ver los cambios. Así que, básicamente, `console.log` sí se está llamando, pero para el momento en el que nuestros tests ya se han ejecutado.
 
-Para solucionarlo, usaremos la función [`vm.$nextTick`](https://vuejs.org/v2/api/#vm-nextTick) para aplazar la llamada al siguiente ciclo de actualización. Pero si hacemos:
+Hay que tener en cuenta que estamos cambiando `inputValue` directamente accediendo a la propiedad de `vm`. Si usamos esta técnica, usaremos la función [`vm.$nextTick`](https://vuejs.org/v2/api/#vm-nextTick) para aplazar la llamada al siguiente ciclo de actualización:
 
 ```javascript
-it('se llama con un nuevo valor en el resto de casos', () => {
+it('se llama con un nuevo valor en el resto de casos', done => {
   cmp.vm.inputValue = 'vue vixens'
   cmp.vm.$nextTick(() => {
     expect(spy).toBeCalled()
+    done()
   })
 })
 ```
 
 <!-- TODO: revisar -->
+_Fíjate que hemos usado una función `done` que recibimos como parámetro. Es una de las maneras en las que [Jest](https://jestjs.io/docs/en/asynchronous.html) testea código asíncrono_
 
-Fallará, dado que el `expect` no se llama para cuando ha terminado. Esto pasa porque ahora la ejecución es asíncrona: ocurre en el _callback_ de `$nextTick` (que, de hecho, devuelve una Promesa). ¿Cómo podemos esperar al `expect`?
-
-Jest nos da el parámetro **`next`** que podemos usar como _callback_ de los `it`, de manera que si está presente, los _test cases_ no terminan hasta que se llama a `next()` y si no está, se ejecutan de manera síncrona. Así que para que sea correcto:
+Ahora bien, hay una manera **mucho mejor**. Los métodos que nos brinda vue-test-utils como `emitted` y `setData`, tienen en cuenta ello. Así que el test anterior podría ser reescrito como
 
 ```javascript
 // Fijarse en el parámetro next:
-it('se llama con un nuevo valor en el resto de casos', next => {
-  cmp.vm.inputValue = 'vue vixens'
-  cmp.vm.$nextTick(() => {
-    expect(spy).toBeCalled()
-    next()
-  })
+it('se llama con un nuevo valor en el resto de casos', () => {
+  cmp.setData({ inputValue: 'vue vixens' })
+  expect(spy).toBeCalled()
 })
 ```
 
-Podemos usar la misma técnica para los otros dos, con la diferencia de que el _spy_ **no** debería llamarse:
+Podemos usar la misma técnica para el siguiente, con la diferencia de que el _spy_ no debería llamarse:
 
 ```javascript
 it('no se llama si se pasa valor vacío (sin espacios delante)', next => {
-  cmp.vm.inputValue = '   '
-  cmp.vm.$nextTick(() => {
-    expect(spy).not.toBeCalled()
-    next()
-  })
+  cmp.setData({ inputValue: '   ' })
+  expect(spy).not.toBeCalled()
 })
 
 it('no se llama si los valores son iguales', next => {
@@ -246,19 +240,17 @@ it('no se llama si los valores son iguales', next => {
 })
 ```
 
-Aquí, el segundo parece un poco más complejo. El estado interno por defecto está vacío, así que necesitamos cambiarlo, esperar al `nextTick`, limpiar el mock para _restear_ el contador y cambiarlo de nuevo.
+Por último, comprobar _que no se llama si son iguales_ parece un poco más complejo. El estado interno por defecto está vacío, así que necesitamos cambiarlo, esperar al `nextTick`, limpiar el mock para _restear_ el contador y cambiarlo de nuevo.
 
-Para simplificarlo también podemos recrear el componente desde su estado inicial, sobreescribiendo la propiedad `data`. Recordemos que podemos sobreescribir cualquier opción del componente usando el segundo parámentro de las funciones `mount` ó `shallow`:
+Para simplificarlo también podemos recrear el componente desde su estado inicial, sobreescribiendo la propiedad `data`. Recordemos que podemos sobreescribir cualquier opción del componente usando el segundo parámentro de las funciones `mount` ó `shallowMount`:
 
 ```javascript
 it('no se llama si los valores son iguales', next => {
-  cmp = shallow(Form, { data: ({ inputValue: 'Sarah Drasner is awesome' }) })
-  cmp.vm.inputValue = 'Sarah Drasner is awesome'
-
-  cmp.vm.$nextTick(() => {
-    expect(spy).not.toBeCalled()
-    next()
+  cmp = shallowMount(Form, {
+    data: () => ({ inputValue: 'Sarah Drasner is awesome' })
   })
+  cmp.setData({ inputValue: 'Sarah Drasner is awesome' })
+  expect(spy).not.toBeCalled()
 })
 ```
 
