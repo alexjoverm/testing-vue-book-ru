@@ -90,14 +90,14 @@ It will show an input, and next to it the same string but reversed. It's just a 
 Now add it to `App.vue`, put it after the `MessageList` component, and remember to import it and include it within the `components` component option. Then, create a `test/Form.test.js` with the usual bare-bones we've used in other tests:
 
 ```javascript
-import { shallow } from 'vue-test-utils'
+import { shallowMount } from '@vue/test-utils'
 import Form from '../src/components/Form'
 
 describe('Form.test.js', () => {
   let cmp
 
   beforeEach(() => {
-    cmp = shallow(Form)
+    cmp = shallowMount(Form)
   })
 })
 ```
@@ -107,12 +107,12 @@ Now create a test suite with 2 test cases:
 ```javascript
 describe('Properties', () => {
   it('returns the string in normal order if reversed property is not true', () => {
-    cmp.vm.inputValue = 'Yoo'
+    cmp.setData({ inputValue: 'Yoo' })
     expect(cmp.vm.reversedInput).toBe('Yoo')
   })
 
   it('returns the reversed string if reversed property is true', () => {
-    cmp.vm.inputValue = 'Yoo'
+    cmp.setData({ inputValue: 'Yoo' })
     cmp.setProps({ reversed: true })
     expect(cmp.vm.reversedInput).toBe('ooY')
   })
@@ -127,8 +127,6 @@ That's it, depending on the computed property it may need more test cases.
 
 ## Watchers
 
-<!-- TODO: correct -->
-
 Honestly, I haven't come across any case where I really need to use watchers that I computed properties couldn't solve. I've seen them misused as well, leading to a very unclear data workflow among components and messing everything up, so don't rush on using them and think beforehand.
 
 As you can see in the [Vue.js docs](https://vuejs.org/v2/guide/computed.html#Watchers), watchers are often used to react to data changes and perform asynchronous operations, such can be performing an ajax request.
@@ -140,7 +138,7 @@ Let's say we wanna do something when the `inputValue` from the state change. We 
 ```javascript
 watch: {
   inputValue(newVal, oldVal) {
-    if(newVal.trim().length && newVal !== oldVal) {
+    if (newVal.trim().length && newVal !== oldVal) {
       console.log(newVal)
     }
   }
@@ -183,7 +181,7 @@ describe('Form.test.js', () => {
 
 We're using a spy on the `console.log` method, initializing before starting any test, and resetting its state after each of them, so that they start from a clean spy.
 
-To test a watch function, we just need to change the value of what's being watch, in this case the `inputValue` state. But there is something curious... let's start by the last test
+To test a watch function, we just need to change the value of what's being watch, in this case the `inputValue` state. But there is something curious... let's start from last test:
 
 ```javascript
 it('is called with the new value in other cases', () => {
@@ -192,72 +190,51 @@ it('is called with the new value in other cases', () => {
 })
 ```
 
-We change the `inputValue`, so the `console.log` spy should be called, right? Well, if you run it, you'll notice that is not! WTF??? Wait, there is an explanation for this: unlike computed properties, watchers are **deferred to the next update cycle** that Vue uses to look for changes. So, basically, what's happening here is that `console.log` is indeed called, but after the test has finished.
+We change the `inputValue`, so the `console.log` spy should be called, right? Well, it won't... But wait, there is an explanation for this: unlike computed properties, watchers are **deferred to the next update cycle** that Vue uses to look for changes. So, basically, what's happening here is that `console.log` is indeed called, but after the test has finished.
 
-To solve this, we need to use the [`vm.$nextTick`](https://vuejs.org/v2/api/#vm-nextTick) function to defer code to the next update cycle. But if we write:
+Notice that we're changing `inputValue` in the _raw_ way, accessing the `vm` property. If we wanted to do it this way, we'd need to use [`vm.$nextTick`](https://vuejs.org/v2/api/#vm-nextTick) function to defer code to the next update cycle:
 
 ```javascript
+it('is called with the new value in other cases', done => {
+  cmp.vm.inputValue = 'foo'
+  cmp.vm.$nextTick(() => {
+    expect(spy).toBeCalled()
+    done()
+  })
+})
+```
+
+_Notice that we call a `done` function that we receive as a parameter. That's [one way Jest](https://jestjs.io/docs/en/asynchronous.html) has to test asynchronous code._
+
+However, there is a **much better way**. The methods that vue-test-utils give us, such as `emitted` or `setData`, take care of that under the hood. So the last test can be written in a cleaner way just by using `setData`:
+
+```js
 it('is called with the new value in other cases', () => {
-  cmp.vm.inputValue = 'foo'
-  cmp.vm.$nextTick(() => {
-    expect(spy).toBeCalled()
-  })
+  cmp.setData({ inputValue: 'foo' })
+  expect(spy).toBeCalled()
 })
 ```
 
-It will still fail, since the test finishes with the `expect` function not being called. That happens because now is asynchronous and happens on the `$nextTick` callback. How can we then test it if the expect happens at a later time?
-
-Jest give us a `next` parameter that we can use in the `it` test callbacks, in a way that if it is present, the test will not finish until `next` is called, but if it's not, it will finish synchronously. So, to finally get it right:
+We can apply the same strategy for the next one, with the difference that the spy shouldn't be called:
 
 ```javascript
-it('is called with the new value in other cases', next => {
-  cmp.vm.inputValue = 'foo'
-  cmp.vm.$nextTick(() => {
-    expect(spy).toBeCalled()
-    next()
-  })
+it('is not called if value is empty (trimmed)', () => {
+  cmp.setData({ inputValue: '   ' })
+  expect(spy).not.toBeCalled()
 })
 ```
 
-We can apply the same strategy for the other two, with the difference that the spy shouldn't be called:
+Finally, testing that _is not called if values are the same_ is a bit more complex. The default internal state is empty, so first we need to change it, wait for the next tick, then clear the mock to reset the call count, and change it again. Then after the second tick, we can check the spy and finish the test.
+
+This can get simpler if we recreate the component at the beginning, overriding the `data` property. Remember we can override any component option by using the second parameter of the `mount` or `shallowMount` functions:
 
 ```javascript
-it('is not called if value is empty (trimmed)', next => {
-  cmp.vm.inputValue = '   '
-  cmp.vm.$nextTick(() => {
-    expect(spy).not.toBeCalled()
-    next()
+it('is not called if values are the same', () => {
+  cmp = shallowMount(Form, {
+    data: () => ({ inputValue: 'foo' })
   })
-})
-
-it('is not called if values are the same', next => {
-  cmp.vm.inputValue = 'foo'
-
-  cmp.vm.$nextTick(() => {
-    spy.mockClear()
-    cmp.vm.inputValue = 'foo'
-
-    cmp.vm.$nextTick(() => {
-      expect(spy).not.toBeCalled()
-      next()
-    })
-  })
-})
-```
-
-That second one gets a bit more complex than it looked like. The default internal state is empty, so first we need to change it, wait for the next tick, then clear the mock to reset the call count, and change it again. Then after the second tick, we can check the spy and finish the test.
-
-This can get simpler if we recreate the component at the beginning, overriding the `data` property. Remember we can override any component option by using the second parameter of the `mount` or `shallow` functions:
-
-```javascript
-it('is not called if values are the same', next => {
-  cmp = shallow(Form, { data: ({ inputValue: 'foo' }) })
-  cmp.vm.inputValue = 'foo'
-
-  cmp.vm.$nextTick(() => {
-    expect(spy).not.toBeCalled()
-    next()
-  })
+  cmp.setData({ inputValue: 'foo' })
+  expect(spy).not.toBeCalled()
 })
 ```
 

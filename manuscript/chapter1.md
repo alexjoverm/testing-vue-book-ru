@@ -30,7 +30,7 @@ Then we'll need to install some dependencies:
 
 ```bash
 # Install dependencies
-npm i -D jest jest-vue-preprocessor babel-jest
+npm i -D jest vue-jest babel-jest
 ```
 
 [`jest-vue-preprocessor`](https://github.com/vire/jest-vue-preprocessor) is needed for making jest understand `.vue` files, and [`babel-jest`](https://github.com/babel/babel-jest) for the integration with Babel.
@@ -57,7 +57,7 @@ Let's add the following Jest configuration in the `package.json`:
   ],
   "transform": {
     "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
-    ".*\\.(vue)$": "<rootDir>/node_modules/jest-vue-preprocessor"
+    ".*\\.(vue)$": "<rootDir>/node_modules/vue-jest"
   }
 }
 ...
@@ -198,14 +198,14 @@ Luckily, **Shallow Rendering** solves this nicely.
 `vue-test-utils` provide us with Shallow Rendering among other features. We could rewrite the previous test as follows:
 
 ```javascript
-import { shallow } from 'vue-test-utils'
+import { shallowMount } from '@vue/test-utils'
 import App from '../src/App'
 
 describe('App.test.js', () => {
   let cmp
 
   beforeEach(() => {
-    cmp = shallow(App, { // Create a shallow instance of the component
+    cmp = shallowMount(App, { // Create a shallow instance of the component
       data: {
         messages: ['Cat']
       }
@@ -239,20 +239,20 @@ exports[`App.test.js has the expected html structure 1`] = `
 
 You see? Now no children have been rendered and we tested the `App` component **fully isolated** from the component tree. Also, if you have any `created` or whatever hooks in the children components, they haven't been called either 😉.
 
-If you're curious about **how shallow render is implemented**, check out the [source code](https://github.com/vuejs/vue-test-utils/blob/master/src/lib/stub-components.js) and you'll see that basically is stubbing the `components` key, the `render` method and the lifecycle hooks.
+If you're curious about **how shallow render is implemented**, check out the [source code](https://github.com/vuejs/vue-test-utils/blob/dev/packages/shared/stub-components.js) and you'll see that basically is stubbing the `components` key, the `render` method and the lifecycle hooks.
 
 In the same vein, you can implement the `MessageList.test.js` test as follows:
 
 ```javascript
-import { shallow } from 'vue-test-utils'
+import { mount } from '@vue/test-utils'
 import MessageList from '../src/components/MessageList'
 
 describe('MessageList.test.js', () => {
   let cmp
 
   beforeEach(() => {
-    cmp = shallow(MessageList, {
-      // Beaware that props is overriden using `propsData`
+    cmp = mount(MessageList, {
+      // Be aware that props is overridden using `propsData`
       propsData: {
         messages: ['Cat']
       }

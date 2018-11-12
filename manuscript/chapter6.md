@@ -4,7 +4,7 @@ Learn how to test methods and cope with mocking module dependencies.
 
 What should we test in methods? That's a question that we had when we started doing unit tests. Everything comes down to **test what that method do, and just that**. This means we need to **avoid calls to any dependency**, so we'll need to mock them.
 
-Let's add a `onSubmit` event to the form in the `Form.vue` component that we created in the [last chapter](#chapter-5):
+Let's add a `onSubmit` event to the form in the `Form.vue` component that we created in the [last article](/2017/09/18/Test-Computed-Properties-and-Watchers-in-Vue-js-Components-with-Jest/):
 
 ```html
 ...
@@ -74,7 +74,7 @@ jest.mock('axios', () => ({
   get: jest.fn()
 }))
 
-import { shallow } from 'vue-test-utils'
+import { shallowMount } from '@vue/test-utils'
 import Form from '../src/components/Form'
 import axios from 'axios' // axios here is the mock from above!
 
@@ -161,7 +161,7 @@ For that reason, it's a good practice to clean the module registry and the mocks
 
 ```javascript
 beforeEach(() => {
-  cmp = shallow(Form)
+  cmp = shallowMount(Form)
   jest.resetModules()
   jest.clearAllMocks()
 })

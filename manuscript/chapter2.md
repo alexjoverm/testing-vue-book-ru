@@ -2,7 +2,7 @@
 
 Let's see how to use vue-test-utils to test a fully rendered component tree.
 
-In [the first chapter](#chapter-1) we've seen how to use Shallow Rendering to test a component in isolation, preventing the components sub-tree from rendering.
+In [Write the first Vue.js Component Unit Test in Jest](/2017/08/21/Write-the-first-Vue-js-Component-Unit-Test-in-Jest/) we've seen how to use Shallow Rendering to test a component in isolation, preventing the components sub-tree from rendering.
 
 But in some cases, we could want to test components that behave as a group, or [molecules](http://atomicdesign.bradfrost.com/chapter-2/#molecules) as stated in Atomic Design. Keep in mind that this apply to [Presentational Components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0), since they're unaware of app state and logic. In most case, you'd want to use Shallow Rendering for Container components.
 
@@ -47,10 +47,10 @@ export default {
 
 ## Testing MessageList with Message Component
 
-To test MessageList with Deep Rendering, we just need to use `mount` instead of `shallow` in the previously created `test/MessageList.test.js`:
+To test MessageList with Deep Rendering, we just need to use `mount` instead of `shallowMount` in the previously created `test/MessageList.test.js`:
 
 ```javascript
-import { mount } from 'vue-test-utils'
+import { mount } from '@vue/test-utils'
 import MessageList from '../src/components/MessageList'
 
 describe('MessageList.test.js', () => {
@@ -58,7 +58,7 @@ describe('MessageList.test.js', () => {
 
   beforeEach(() => {
     cmp = mount(MessageList, {
-      // Beaware that props is overriden using `propsData`
+      // Be aware that props is overridden using `propsData`
       propsData: {
         messages: ['Cat']
       }
@@ -77,7 +77,7 @@ describe('MessageList.test.js', () => {
 
  > Btw, have you realized about the `beforeEach` thing? That's a very clean way to create a clean component before each test, which is very important in unit testing, since it defines that test shouldn't depend on each other.
 
-Both `mount` and `shallow` use exactly the same API, the difference is in the rendering. I'll show you progressively the API along in this series.
+Both `mount` and `shallowMount` use exactly the same API, the difference is in the rendering. I'll show you progressively the API along in this series.
 
 If you run `npm t` you'll see the test are failing because the Snapshot doesn't match for `MessageList.test.js`. To regenerate them, run it with `-u` option:
 
@@ -101,7 +101,7 @@ exports[`MessageList.test.js has the expected html structure 1`] = `
 `;
 ```
 
-Keep in mind to **avoid deep rendering when there can be side effects**, since the children component hooks, such `created` and `mount` will be triggered, and there can be HTTP calls or other side effects there that we don't want to be called. If you wanna try what I'm saying, add to the `Message.vue` component a `console.log` in the created hook:
+Keep in mind to **avoid deep rendering when there can be side effects**, since the children component hooks, such `created` and `mount` will be triggered, and there can be HTTP calls or other side effects there that we don't want to be called. If you wanna try what I'm saying, add to the `Message.vue` component a `console.log` in the `created` hook:
 
 ```javascript
 export default {
