@@ -108,4 +108,4 @@ I> Кстати говоря, вы поняли, что такое `beforeEach`?
 
 Теперь, если вы снова запустите тесты с помощью `npm t`, увидите текст `"СОЗДАН!"` в выводе терминала. Поэтому будьте осторожны.
 
-Вы можете найти [полный пример на GitHub](https://github.com/alexjoverm/vue-testing-series/tree/https://github.com/alexjoverm/vue-testing-series/tree/Test-fully-rendered-Vue-js-Components-in-Jest).
+Вы можете найти [полный пример на GitHub](https://github.com/alexjoverm/vue-testing-series/tree/Test-fully-rendered-Vue-js-Components-in-Jest).

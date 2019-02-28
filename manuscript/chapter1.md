@@ -41,7 +41,7 @@ I> ## На заметку
 I> [Vue Test Utils](https://github.com/vuejs/vue-test-utils) предоставляет набор утилит для утверждений (выполнения проверок) на компонентах Vue.js. В книге мы используем последнюю на момент написания версию этого инструмента — `1.0.0-beta.24`.
 
 {lang=bash, linenos=off}
-    npm i -D vue-test-utils
+    npm i -D @vue/test-utils
 
 Давайте добавим следующую конфигурацию для Jest в `package.json`:
 
