@@ -6,11 +6,11 @@
 
 ## Объект Wrapper
 
-`Wrapper` — главный объект Vue Test Utils. Это тип, возвращаемый функциями `mount`,` shallow`, `find` и `findAll`. Вы можете [посмотреть здесь](https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts#L84) весь API и типы.
+`Wrapper` — главный объект Vue Test Utils. Это тип, возвращаемый функциями `mount`,` shallow`, `find` и `findAll`. Вы можете [посмотреть здесь](https://github.com/vuejs/vue-test-utils/blob/v1.0.0-beta.27/packages/test-utils/types/index.d.ts) весь API и типы.
 
 ### Методы `find` и `findAll`
 
-Они принимают параметр [Selector](https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts#L17) в качестве аргумента, который может быть как CSS-селектором, так и Vue-компонентом.
+Они принимают параметр [Selector](https://github.com/vuejs/vue-test-utils/blob/v1.0.0-beta.27/packages/test-utils/types/index.d.ts#L92) в качестве аргумента, который может быть как CSS-селектором, так и Vue-компонентом.
 
 Поэтому мы можем сделать что-то подобное:
 
@@ -89,6 +89,6 @@
 
 ## Резюме
 
-Для упрощения тестирования компонентов Vue существует куча утилит. Вы можете найти их все в [файле типизации](https://github.com/vuejs/vue-test-utils/blob/dev/packages/test-utils/types/index.d.ts).
+Для упрощения тестирования компонентов Vue существует куча утилит. Вы можете найти их все в [файле типизации](https://github.com/vuejs/vue-test-utils/blob/v1.0.0-beta.27/packages/test-utils/types/index.d.ts).
 
 Вы можете найти рабочий код этой главы в [этом репозитории](https://github.com/alexjoverm/vue-testing-series/blob/Test-Styles-and-Structure-in-Vue-js-and-Jest/test/MessageList.test.js).
