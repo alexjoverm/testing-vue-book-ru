@@ -86,10 +86,10 @@ I> [Vue Test Utils](https://github.com/vuejs/vue-test-utils) предостав�
     </template>
 
     <script>
-    export default {
-      name: 'list',
-      props: ['messages']
-    };
+      export default {
+        name: 'list',
+        props: ['messages']
+      };
     </script>
 
 И обновите `App.vue`, чтобы использовать его, следующим образом:
@@ -97,20 +97,20 @@ I> [Vue Test Utils](https://github.com/vuejs/vue-test-utils) предостав�
 {lang=html}
     <template>
       <div id="app">
-        <MessageList :messages="messages"/>
+        <MessageList :messages="messages" />
       </div>
     </template>
 
     <script>
-    import MessageList from './components/MessageList'
+      import MessageList from './components/MessageList'
 
-    export default {
-      name: 'app',
-      data: () => ({ messages: ['Привет, Джон', 'Как дела, Пако?'] }),
-      components: {
-        MessageList
-      }
-    };
+      export default {
+        name: 'app',
+        data: () => ({ messages: ['Привет, Джон', 'Как дела, Пако?'] }),
+        components: {
+          MessageList
+        }
+      };
     </script>
 
 У нас уже есть пара компонентов, которые мы можем протестировать. Давайте создадим каталог `test` в корне проекта и файл `App.test.js`:
@@ -150,7 +150,7 @@ I> Обычно сообщения в функции `it` пишутся на а
 
 {lang=javascript}
     it('имеет ожидаемую структуру HTML', () => {
-      expect(vm.$el).toMatchSnapshot();
+      expect(cmp.element).toMatchSnapshot();
     });
 
 Это создаст файл `test/__snapshots__/App.test.js.snap`. Давайте откроем и изучим его:
